@@ -7,7 +7,7 @@ spec:
   project: {{ .Values.spec.project }}
   source:
     repoURL: 'https://istio-release.storage.googleapis.com/charts'
-    targetRevision: '1.22.0'
+    targetRevision: '1.30.0'
     chart: base
   destination:
     server: {{ .Values.spec.destination.server }}
@@ -28,7 +28,7 @@ spec:
   project: {{ .Values.spec.project }}
   source:
     repoURL: 'https://istio-release.storage.googleapis.com/charts'
-    targetRevision: '1.22.0'
+    targetRevision: '1.30.0'
     chart: istiod
   destination:
     server: {{ .Values.spec.destination.server }}
@@ -49,7 +49,7 @@ spec:
   project: {{ .Values.spec.project }}
   source:
     repoURL: 'https://istio-release.storage.googleapis.com/charts'
-    targetRevision: '1.22.0'
+    targetRevision: '1.30.0'
     chart: gateway
   destination:
     server: {{ .Values.spec.destination.server }}
