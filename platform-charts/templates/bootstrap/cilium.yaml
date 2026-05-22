@@ -15,6 +15,9 @@ spec:
         operator:
           replicas: {{ .Values.cilium.operator.replicas }}
         {{- end }}
+        {{- if and .Values.cilium .Values.cilium.kubeProxyReplacement }}
+        kubeProxyReplacement: {{ .Values.cilium.kubeProxyReplacement }}
+        {{- end }}
         ingressController:
           enabled: {{ .Values.cilium.ingressController.enabled | default false }}
           default: {{ .Values.cilium.ingressController.default | default false }}

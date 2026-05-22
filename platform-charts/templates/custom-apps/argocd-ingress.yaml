@@ -6,6 +6,7 @@ metadata:
   annotations:
     kubernetes.io/ingress.class: cilium
 spec:
+  ingressClassName: cilium
   rules:
     - host: argocd.localhost
       http:
