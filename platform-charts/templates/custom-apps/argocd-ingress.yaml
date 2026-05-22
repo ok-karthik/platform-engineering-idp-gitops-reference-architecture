@@ -1,24 +1,53 @@
-apiVersion: traefik.io/v1alpha1
-kind: IngressRoute
+apiVersion: networking.k8s.io/v1
+kind: Ingress
 metadata:
   name: argocd-server
   namespace: argocd
   annotations:
-    kubernetes.io/ingress.class: traefik
+    kubernetes.io/ingress.class: cilium
 spec:
-  entryPoints:
-    - web
-    - websecure
-  routes:
-    - match: Host(`argocd.localhost`) || Host(`argocd.k8s.orb.local`)
-      kind: Rule
-      services:
-        - name: argocd-server
-          port: 80
-      middlewares:
-        - name: platform-headers
-          namespace: traefik
-        - name: platform-ratelimit
-          namespace: traefik
-        - name: platform-retry
-          namespace: traefik
+  rules:
+    - host: argocd.localhost
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: argocd-server
+                port:
+                  number: 80
+    - host: argocd.k8s.orb.local
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: argocd-server
+                port:
+                  number: 80
+#apiVersion: traefik.io/v1alpha1
+#kind: IngressRoute
+#metadata:
+#  name: argocd-server
+#  namespace: argocd
+#  annotations:
+#    kubernetes.io/ingress.class: traefik
+#spec:
+#  entryPoints:
+#    - web
+#    - websecure
+#  routes:
+#    - match: Host(`argocd.localhost`) || Host(`argocd.k8s.orb.local`)
+#      kind: Rule
+#      services:
+#        - name: argocd-server
+#          port: 80
+#      middlewares:
+#        - name: platform-headers
+#          namespace: traefik
+#        - name: platform-ratelimit
+#          namespace: traefik
+#        - name: platform-retry
+#          namespace: traefik

@@ -7,3 +7,11 @@ spec:
 cilium:
   operator:
     replicas: 2
+
+cilium:
+  operator:
+    replicas: 1
+  ingressController:
+    enabled: true
+    default: true
+    loadbalancerMode: shared

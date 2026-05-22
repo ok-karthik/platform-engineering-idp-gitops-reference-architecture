@@ -8,3 +8,10 @@ cilium:
   operator:
     replicas: 1
 
+cilium:
+  operator:
+    replicas: 1
+  ingressController:
+    enabled: true
+    default: true
+    loadbalancerMode: shared

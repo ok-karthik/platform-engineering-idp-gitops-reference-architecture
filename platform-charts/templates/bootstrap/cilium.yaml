@@ -15,6 +15,10 @@ spec:
         operator:
           replicas: {{ .Values.cilium.operator.replicas }}
         {{- end }}
+        ingressController:
+          enabled: {{ .Values.cilium.ingressController.enabled | default false }}
+          default: {{ .Values.cilium.ingressController.default | default false }}
+          loadbalancerMode: {{ .Values.cilium.ingressController.loadbalancerMode | default "shared" }}
   destination:
     server: {{ .Values.spec.destination.server }}
     namespace: kube-system
