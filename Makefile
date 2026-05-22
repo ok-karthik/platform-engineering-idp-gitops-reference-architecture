@@ -24,16 +24,8 @@ help:
 # Conditional commands based on CLUSTER_PROVIDER
 ifeq ($(CLUSTER_PROVIDER),k3d)
 CREATE_CLUSTER_CMD = k3d cluster create $(CLUSTER_NAME) \
-	--k3s-arg "--disable=traefik,servicelb@server:*" \
-	--k3s-arg "--flannel-backend=none@server:*" \
-	--k3s-arg "--disable-network-policy@server:*" \
-	--k3s-arg "--disable-kube-proxy@server:*" \
-	-p "80:80@loadbalancer" -p "443:443@loadbalancer" && \
-	echo "Mounting bpffs on k3d nodes..." && \
-	for node in $$(docker ps -f "name=k3d-$(CLUSTER_NAME)" --format "{{.Names}}"); do \
-		docker exec $$node mount bpffs /sys/fs/bpf -t bpf || true; \
-		docker exec $$node mount --make-shared /sys/fs/bpf || true; \
-	done
+	--k3s-arg "--disable=traefik@server:*" \
+	-p "80:80@loadbalancer" -p "443:443@loadbalancer"
 DELETE_CLUSTER_CMD = k3d cluster delete $(CLUSTER_NAME)
 else ifeq ($(CLUSTER_PROVIDER),minikube)
 CREATE_CLUSTER_CMD = minikube start --profile $(CLUSTER_NAME) && minikube addons enable ingress --profile $(CLUSTER_NAME)
@@ -74,29 +66,6 @@ delete-cluster:
 	@echo "Deleting cluster..."
 	$(DELETE_CLUSTER_CMD)
 
-install-cilium:
-ifeq ($(CLUSTER_PROVIDER),k3d)
-	@echo "Adding Cilium Helm repository..."
-	helm repo add cilium https://helm.cilium.io/
-	helm repo update
-	@echo "Installing Cilium CNI..."
-	helm upgrade --install cilium cilium/cilium \
-		--version 1.19.4 \
-		--namespace kube-system \
-		--create-namespace \
-		--set kubeProxyReplacement=true \
-		--set k8sServiceHost=k3d-$(CLUSTER_NAME)-server-0 \
-		--set k8sServicePort=6443 \
-		--set bpf.masquerade=false \
-		--set l2announcements.enabled=true \
-		--set operator.replicas=1 \
-		--set ingressController.enabled=true \
-		--set ingressController.default=true \
-		--set ingressController.loadbalancerMode=shared
-else
-	@echo "Skipping Cilium installation for $(CLUSTER_PROVIDER)"
-endif
-
 install-argocd:
 	@echo "Adding ArgoCD Helm repository..."
 	helm repo add argo https://argoproj.github.io/argo-helm
@@ -118,7 +87,7 @@ configure-aws:
 	@echo "Creating/updating AWS credentials secret..."
 	kubectl create secret generic aws-creds -n crossplane-system --from-file=creds=$(AWS_CREDS) --dry-run=client -o yaml | kubectl apply -f -
 
-up setup: create-cluster install-cilium install-argocd bootstrap configure-aws
+up setup: create-cluster install-argocd bootstrap configure-aws
 	@echo "Platform setup completed successfully!"
 
 clean:

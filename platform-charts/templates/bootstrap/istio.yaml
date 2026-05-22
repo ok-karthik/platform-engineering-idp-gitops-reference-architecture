@@ -1,0 +1,62 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: istio-base
+  namespace: {{ .Values.spec.destination.namespace }}
+spec:
+  project: {{ .Values.spec.project }}
+  source:
+    repoURL: 'https://istio-release.s3.amazonaws.com/charts'
+    targetRevision: '1.22.0'
+    chart: base
+  destination:
+    server: {{ .Values.spec.destination.server }}
+    namespace: istio-system
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: istiod
+  namespace: {{ .Values.spec.destination.namespace }}
+spec:
+  project: {{ .Values.spec.project }}
+  source:
+    repoURL: 'https://istio-release.s3.amazonaws.com/charts'
+    targetRevision: '1.22.0'
+    chart: istiod
+  destination:
+    server: {{ .Values.spec.destination.server }}
+    namespace: istio-system
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: istio-ingress
+  namespace: {{ .Values.spec.destination.namespace }}
+spec:
+  project: {{ .Values.spec.project }}
+  source:
+    repoURL: 'https://istio-release.s3.amazonaws.com/charts'
+    targetRevision: '1.22.0'
+    chart: gateway
+  destination:
+    server: {{ .Values.spec.destination.server }}
+    namespace: istio-system
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
