@@ -9,6 +9,12 @@ spec:
     repoURL: 'https://helm.cilium.io/'
     targetRevision: '1.19.4'
     chart: cilium
+    helm:
+      values: |
+        {{- if and .Values.cilium (and .Values.cilium.operator .Values.cilium.operator.replicas) }}
+        operator:
+          replicas: {{ .Values.cilium.operator.replicas }}
+        {{- end }}
   destination:
     server: {{ .Values.spec.destination.server }}
     namespace: kube-system
