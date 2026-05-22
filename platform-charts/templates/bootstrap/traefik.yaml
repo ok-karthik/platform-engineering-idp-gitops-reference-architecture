@@ -1,34 +1,34 @@
-apiVersion: argoproj.io/v1alpha1
-kind: Application
-metadata:
-  name: traefik
-  namespace: {{ .Values.spec.destination.namespace }}
-spec:
-  project: {{ .Values.spec.project }}
-  source:
-    repoURL: 'https://helm.traefik.io/traefik'
-    targetRevision: '26.0.0'
-    chart: traefik
-    helm:
-      parameters:
-        - name: "providers.kubernetesIngress.publishedService.enabled"
-          value: "true"
-        - name: "service.annotations.service\\.beta\\.kubernetes\\.io/aws-load-balancer-type"
-          value: "external"
-        - name: "service.annotations.service\\.beta\\.kubernetes\\.io/aws-load-balancer-nlb-target-type"
-          value: "instance"
-        - name: "service.annotations.service\\.beta\\.kubernetes\\.io/aws-load-balancer-scheme"
-          value: "internet-facing"
-        - name: "providers.kubernetesCRD.allowCrossNamespace"
-          value: "true"
-        - name: "ports.traefik.expose"
-          value: "true"
-  destination:
-    server: {{ .Values.spec.destination.server }}
-    namespace: traefik
-  syncPolicy:
-    automated:
-      prune: true
-      selfHeal: true
-    syncOptions:
-      - CreateNamespace=true
+#apiVersion: argoproj.io/v1alpha1
+#kind: Application
+#metadata:
+#  name: traefik
+#  namespace: {{ .Values.spec.destination.namespace }}
+#spec:
+#  project: {{ .Values.spec.project }}
+#  source:
+#    repoURL: 'https://helm.traefik.io/traefik'
+#    targetRevision: '26.0.0'
+#    chart: traefik
+#    helm:
+#      parameters:
+#        - name: "providers.kubernetesIngress.publishedService.enabled"
+#          value: "true"
+#        - name: "service.annotations.service\\.beta\\.kubernetes\\.io/aws-load-balancer-type"
+#          value: "external"
+#        - name: "service.annotations.service\\.beta\\.kubernetes\\.io/aws-load-balancer-nlb-target-type"
+#          value: "instance"
+#        - name: "service.annotations.service\\.beta\\.kubernetes\\.io/aws-load-balancer-scheme"
+#          value: "internet-facing"
+#        - name: "providers.kubernetesCRD.allowCrossNamespace"
+#          value: "true"
+#        - name: "ports.traefik.expose"
+#          value: "true"
+#  destination:
+#    server: {{ .Values.spec.destination.server }}
+#    namespace: traefik
+#  syncPolicy:
+#    automated:
+#      prune: true
+#      selfHeal: true
+#    syncOptions:
+#      - CreateNamespace=true
