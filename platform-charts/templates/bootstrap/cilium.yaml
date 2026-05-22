@@ -18,6 +18,18 @@ spec:
         {{- if and .Values.cilium .Values.cilium.kubeProxyReplacement }}
         kubeProxyReplacement: {{ .Values.cilium.kubeProxyReplacement }}
         {{- end }}
+        {{- if and .Values.cilium (and .Values.cilium.k8sServiceHost (ne .Values.cilium.k8sServiceHost "")) }}
+        k8sServiceHost: {{ .Values.cilium.k8sServiceHost }}
+        k8sServicePort: {{ .Values.cilium.k8sServicePort | default 6443 }}
+        {{- end }}
+        {{- if and .Values.cilium .Values.cilium.bpf }}
+        bpf:
+          masquerade: {{ .Values.cilium.bpf.masquerade }}
+        {{- end }}
+        {{- if and .Values.cilium .Values.cilium.l2announcements }}
+        l2announcements:
+          enabled: {{ .Values.cilium.l2announcements.enabled }}
+        {{- end }}
         ingressController:
           enabled: {{ .Values.cilium.ingressController.enabled | default false }}
           default: {{ .Values.cilium.ingressController.default | default false }}

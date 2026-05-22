@@ -8,6 +8,12 @@ cilium:
   operator:
     replicas: 2
   kubeProxyReplacement: "true"
+  k8sServiceHost: ""
+  k8sServicePort: 443
+  bpf:
+    masquerade: true
+  l2announcements:
+    enabled: false
   ingressController:
     enabled: true
     default: true
