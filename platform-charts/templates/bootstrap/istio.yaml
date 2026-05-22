@@ -6,7 +6,7 @@ metadata:
 spec:
   project: {{ .Values.spec.project }}
   source:
-    repoURL: 'https://istio-release.s3.amazonaws.com/charts'
+    repoURL: 'https://istio-release.storage.googleapis.com/charts'
     targetRevision: '1.22.0'
     chart: base
   destination:
@@ -27,7 +27,7 @@ metadata:
 spec:
   project: {{ .Values.spec.project }}
   source:
-    repoURL: 'https://istio-release.s3.amazonaws.com/charts'
+    repoURL: 'https://istio-release.storage.googleapis.com/charts'
     targetRevision: '1.22.0'
     chart: istiod
   destination:
@@ -48,7 +48,7 @@ metadata:
 spec:
   project: {{ .Values.spec.project }}
   source:
-    repoURL: 'https://istio-release.s3.amazonaws.com/charts'
+    repoURL: 'https://istio-release.storage.googleapis.com/charts'
     targetRevision: '1.22.0'
     chart: gateway
   destination:
