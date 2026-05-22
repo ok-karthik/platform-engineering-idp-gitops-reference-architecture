@@ -30,6 +30,15 @@ spec:
     repoURL: 'https://istio-release.storage.googleapis.com/charts'
     targetRevision: '1.30.0'
     chart: istiod
+    helm:
+      values: |
+        resources:
+          requests:
+            cpu: 100m
+            memory: 256Mi
+          limits:
+            cpu: 500m
+            memory: 512Mi
   destination:
     server: {{ .Values.spec.destination.server }}
     namespace: istio-system
