@@ -1,10 +1,12 @@
-#apiVersion: platform.io/v1alpha1
-#kind: AWSBucket
-#metadata:
-#  name: my-first-cloud-bucket
-#  namespace: default
-#spec:
-#  parameters:
-#    bucketName: my-idp-test-bucket-998877 # Change this to something random!
-#    region: us-east-1
-#    isEncrypted: true
+{{- if .Values.components.crossplane.enabled }}
+apiVersion: platform.io/v1alpha1
+kind: AWSBucket
+metadata:
+  name: my-first-cloud-bucket
+  namespace: default
+spec:
+  parameters:
+    bucketName: my-idp-test-bucket-998877
+    region: us-east-1
+    isEncrypted: true
+{{- end }}

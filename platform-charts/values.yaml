@@ -3,3 +3,21 @@ spec:
   destination:
     server: https://kubernetes.default.svc
     namespace: argocd
+
+components:
+  argoRollouts:
+    enabled: true
+  certManager:
+    enabled: true
+  crossplane:
+    enabled: false
+  kyverno:
+    enabled: false
+  sealedSecrets:
+    enabled: true
+  sealedSecretDemo:
+    enabled: false
+  traefik:
+    enabled: true
+  argocdIngress:
+    enabled: true

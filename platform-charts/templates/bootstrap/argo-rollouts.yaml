@@ -1,3 +1,4 @@
+{{- if .Values.components.argoRollouts.enabled }}
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
@@ -32,3 +33,4 @@ spec:
       kind: "CustomResourceDefinition"
       jsonPointers:
         - /spec/preserveUnknownFields
+{{- end }}
