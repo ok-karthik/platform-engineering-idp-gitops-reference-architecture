@@ -3,7 +3,7 @@ CLUSTER_PROVIDER ?= k3d
 CLUSTER_NAME ?= nexus-platform
 AWS_CREDS ?= ./aws-creds.ini
 
-.PHONY: help check-deps create-cluster delete-cluster install-argocd bootstrap configure-aws up setup clean destroy
+.PHONY: help check-deps create-cluster delete-cluster install-argocd bootstrap configure-aws up setup clean destroy get-argocd-creds
 
 # Default target: show help
 help:
@@ -87,8 +87,18 @@ configure-aws:
 	@echo "Creating/updating AWS credentials secret..."
 	kubectl create secret generic aws-creds -n crossplane-system --from-file=creds=$(AWS_CREDS) --dry-run=client -o yaml | kubectl apply -f -
 
-up setup: create-cluster install-argocd bootstrap configure-aws
+up setup: create-cluster install-argocd bootstrap configure-aws get-argocd-creds
 	@echo "Platform setup completed successfully!"
+
+get-argocd-creds:
+	@echo "===================================================="
+	@echo "ArgoCD Access Information:"
+	@echo "URL: http://argocd.localhost"
+	@echo "Username: admin"
+	@printf "Password: "
+	@kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath="{.data.password}" | base64 -d
+	@echo ""
+	@echo "===================================================="
 
 clean:
 	@echo "Cleaning up deployed components..."
