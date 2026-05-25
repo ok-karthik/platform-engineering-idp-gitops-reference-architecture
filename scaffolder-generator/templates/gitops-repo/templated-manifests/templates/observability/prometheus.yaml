@@ -1,0 +1,29 @@
+{{- if .Values.components.prometheus.enabled }}
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: prometheus
+  namespace: {{ .Values.spec.destination.namespace }}
+spec:
+  project: {{ .Values.spec.project }}
+  source:
+    repoURL: 'https://prometheus-community.github.io/helm-charts'
+    targetRevision: '61.1.0'
+    chart: kube-prometheus-stack
+    helm:
+      parameters:
+        - name: "grafana.enabled"
+          value: "true"
+        - name: "prometheusOperator.enabled"
+          value: "true"
+  destination:
+    server: {{ .Values.spec.destination.server }}
+    namespace: monitoring
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+      - ServerSideApply=true
+{{- end }}

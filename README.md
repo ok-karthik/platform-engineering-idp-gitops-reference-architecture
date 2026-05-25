@@ -5,6 +5,8 @@
 
 A declarative Internal Developer Platform (IDP) designed for local-to-cloud infrastructure orchestration. This blueprint implements a "Local-First" Control Plane architecture to manage cloud resources and application lifecycles via GitOps.
 
+The platform generator implements soft multi-tenancy, treating each developer team as a logical tenant with isolated namespaces, network policies, and dedicated observability stacks."
+
 ---
 
 ## 🏗️ Architecture
