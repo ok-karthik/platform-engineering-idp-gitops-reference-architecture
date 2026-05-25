@@ -1,2 +1,9 @@
 argocd-repositories.yaml
 *.ini
+.venv/
+**/.venv/
+**/venv/
+**/*.pyc
+**/__pycache__/
+generated-apps/
+**/generated-apps/

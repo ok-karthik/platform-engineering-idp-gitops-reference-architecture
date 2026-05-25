@@ -1,0 +1,22 @@
+{{- if .Values.components.opentelemetry.enabled }}
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: opentelemetry
+  namespace: {{ .Values.spec.destination.namespace }}
+spec:
+  project: {{ .Values.spec.project }}
+  source:
+    repoURL: 'https://open-telemetry.github.io/opentelemetry-helm-charts'
+    targetRevision: '0.65.0'
+    chart: opentelemetry-operator
+  destination:
+    server: {{ .Values.spec.destination.server }}
+    namespace: opentelemetry
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+{{- end }}

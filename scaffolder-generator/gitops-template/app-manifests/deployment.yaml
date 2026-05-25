@@ -1,0 +1,27 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ app_name}}
+  labels:
+    app: {{ app_name}}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: {{ app_name}}
+  template:
+    metadata:
+      app: {{ app_name}}
+      annotations:
+        app: {{ app_name}}
+      labels:
+        app: {{ app_name}}
+    spec:
+      containers:
+        - name: {{ app_name}}
+          image: "{{ app_name }}:latest"
+          imagePullPolicy:IfNotPresent
+          ports:
+            - name: http
+              containerPort: {{ app_port }}
+              protocol: TCP

@@ -21,3 +21,11 @@ components:
     enabled: true
   argocdIngress:
     enabled: true
+  loki:
+    enabled: true
+  opentelemetry:
+    enabled: true
+  prometheus:
+    enabled: true
+  tempo:
+    enabled: true
