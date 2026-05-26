@@ -10,6 +10,11 @@ spec:
     repoURL: 'https://open-telemetry.github.io/opentelemetry-helm-charts'
     targetRevision: '0.65.0'
     chart: opentelemetry-operator
+    helm:
+      values: |
+        admissionWebhooks:
+          certManager:
+            enabled: true
   destination:
     server: {{ .Values.spec.destination.server }}
     namespace: opentelemetry

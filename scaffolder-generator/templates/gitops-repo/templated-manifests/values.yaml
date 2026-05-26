@@ -14,7 +14,14 @@ serviceAccount:
   annotations: {}
   name: ""
 
-podAnnotations: {}
+podAnnotations:
+  {% if app_type == 'springboot' -%}
+  instrumentation.opentelemetry.io/inject-java: "true"
+  {%- elif app_type == 'golang' -%}
+  instrumentation.opentelemetry.io/inject-sdk: "true"
+  {%- else -%}
+  instrumentation.opentelemetry.io/inject-{{ app_type }}: "true"
+  {%- endif %}
 podLabels: {}
 
 podSecurityContext: {}

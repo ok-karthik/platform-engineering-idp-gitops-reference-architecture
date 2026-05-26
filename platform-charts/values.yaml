@@ -14,7 +14,7 @@ components:
   kyverno:
     enabled: false
   sealedSecrets:
-    enabled: true
+    enabled: false
   sealedSecretDemo:
     enabled: false
   traefik:
