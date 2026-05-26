@@ -68,7 +68,7 @@ jobs:
       # Sets up the Cloud Native Buildpacks 'pack' CLI tool
       - name: Setup pack CLI
         if: steps.check_dockerfile.outputs.exists == 'false'
-        uses: buildpacks/github-actions/setup-pack@v2.10.2
+        uses: buildpacks/github-actions/setup-pack@v5.1.0
 
       - name: Build with Buildpacks
         if: steps.check_dockerfile.outputs.exists == 'false'
