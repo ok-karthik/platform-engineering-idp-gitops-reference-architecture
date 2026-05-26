@@ -16,7 +16,9 @@ serviceAccount:
 
 podAnnotations:
   instrumentation.opentelemetry.io/inject-python: "true"
-podLabels: {}
+
+podLabels: 
+  team: "demo-tenant"
 
 podSecurityContext: {}
 securityContext: {}

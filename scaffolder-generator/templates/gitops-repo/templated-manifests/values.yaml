@@ -22,7 +22,9 @@ podAnnotations:
   {%- else -%}
   instrumentation.opentelemetry.io/inject-{{ app_type }}: "true"
   {%- endif %}
-podLabels: {}
+
+podLabels: 
+  team: "{{ team_name }}"
 
 podSecurityContext: {}
 securityContext: {}

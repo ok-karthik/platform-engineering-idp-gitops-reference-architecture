@@ -7,9 +7,10 @@ on:
     paths:
       - 'generated-apps/**'
 
-# Grants write permission to push the rendered manifests back to the repo
+# Grants write permission to push the rendered manifests back to the repo and publish images to GHCR
 permissions:
   contents: write
+  packages: write
 
 jobs:
   run-demo-pipelines:
@@ -23,25 +24,65 @@ jobs:
         with:
           version: v3.12.0
 
-      - name: Run Manifest Rendering for Generated Apps
+      - name: Lowercase repository name
+        id: repo_name
+        run: |
+          echo "image_name=$(echo "${{ github.repository }}" | tr '[:upper:]' '[:lower:]')" >> $GITHUB_OUTPUT
+
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Setup pack CLI
+        uses: buildpacks/github-actions/setup-pack@v2.10.2
+
+      - name: Run CI/CD Pipelines for Generated Apps
         run: |
           # Find all generated applications that have a templated-manifests directory
           for dir in generated-apps/*/*-gitops-repo/apps/*; do
             if [ -d "$dir/templated-manifests" ]; then
+              TENANT_NAME=$(echo "$dir" | awk -F'/' '{print $2}')
               APP_NAME=$(basename "$dir")
-              echo "---------------------------------------------------"
-              echo "🚀 Simulating CD Pipeline for App: $APP_NAME in $dir"
-              echo "---------------------------------------------------"
+              SRC_DIR="generated-apps/$TENANT_NAME/apps-source/$APP_NAME"
               
+              echo "==================================================="
+              echo "🚀 Running Pipelines for App: $APP_NAME ($TENANT_NAME)"
+              echo "==================================================="
+              
+              # 1. Simulate CI Pipeline (Image Build & Publish)
+              if [ -d "$SRC_DIR" ]; then
+                echo "---------------------------------------------------"
+                echo "📦 Building & Publishing Docker Image"
+                echo "---------------------------------------------------"
+                
+                IMAGE_TAG_LATEST="ghcr.io/${{ steps.repo_name.outputs.image_name }}/$TENANT_NAME/$APP_NAME:latest"
+                IMAGE_TAG_RUN="ghcr.io/${{ steps.repo_name.outputs.image_name }}/$TENANT_NAME/$APP_NAME:v${{ github.run_number }}"
+                
+                if [ -f "$SRC_DIR/Dockerfile" ]; then
+                  echo "Dockerfile found. Building with BuildKit..."
+                  docker build -t "$IMAGE_TAG_LATEST" -t "$IMAGE_TAG_RUN" -f "$SRC_DIR/Dockerfile" "$SRC_DIR"
+                  docker push "$IMAGE_TAG_LATEST"
+                  docker push "$IMAGE_TAG_RUN"
+                else
+                  echo "No Dockerfile found. Building with Cloud Native Buildpacks..."
+                  pack build "$IMAGE_TAG_LATEST" --path "$SRC_DIR" --builder paketobuildpacks/builder-jammy-base
+                  docker tag "$IMAGE_TAG_LATEST" "$IMAGE_TAG_RUN"
+                  docker push "$IMAGE_TAG_LATEST"
+                  docker push "$IMAGE_TAG_RUN"
+                fi
+              fi
+              
+              # 2. Simulate CD Pipeline (Manifest Rendering)
+              echo "---------------------------------------------------"
+              echo "☸️ Rendering Helm Manifests"
+              echo "---------------------------------------------------"
               cd "$dir"
-              
-              # Clear old rendered manifests
               rm -rf rendered-manifests/*
               mkdir -p rendered-manifests
-              
-              # Execute Helm rendering and split output to separate files (mimics cd.yaml template)
               helm template "$APP_NAME" templated-manifests | awk -v out="rendered-manifests" -F": " '$0~/^# Source: /{file=$2; sub(/^[^\/]+\/templates\//, "", file); file=out"/"file; dir=file; sub(/\/[^\/]+$/, "", dir); system("mkdir -p \"" dir "\""); print > file} $0!~/^#/ && $0!="---"{print >> file}'
-              
               cd - > /dev/null
             fi
           done
