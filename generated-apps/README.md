@@ -19,14 +19,14 @@ graph TD
     end
 
     subgraph GitHub Actions Orchestrator
-        Commit -- triggers --#gt; GHA[3. Forwarder Workflow: demo-apps-ci-cd.yaml]
-        GHA -- runs Helm template on --#gt; Render[4. Render manifest templates]
-        Render -- commits & pushes changes --#gt; GitOpsDir[5. Updates gitops-repo/rendered-manifests]
+        Commit -- triggers --> GHA[3. Forwarder Workflow: demo-apps-ci-cd.yaml]
+        GHA -- runs Helm template on --> Render[4. Render manifest templates]
+        Render -- commits & pushes changes --> GitOpsDir[5. Updates gitops-repo/rendered-manifests]
     end
 
     subgraph GitOps Engine
-        GitOpsDir -- webhook/poll --#gt; ArgoCD[6. ArgoCD detects change]
-        ArgoCD -- reconciles state --#gt; K8s[7. Deploys to Local Cluster]
+        GitOpsDir -- webhook/poll --> ArgoCD[6. ArgoCD detects change]
+        ArgoCD -- reconciles state --> K8s[7. Deploys to Local Cluster]
     end
 
     style Local Development fill:#1f2937,stroke:#4b5563,stroke-width:2px,color:#fff
