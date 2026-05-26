@@ -40,7 +40,7 @@ jobs:
               mkdir -p rendered-manifests
               
               # Execute Helm rendering and split output to separate files (mimics cd.yaml template)
-              helm template "$APP_NAME" templated-manifests | awk -v out="rendered-manifests" -F": " '$0~/^# Source: /{file=out"/"$2; dir=gensub(/\/[^\/]+$/, "", "g", file); system("mkdir -p " dir); print > file} $0!~/^#/ && $0!="---"{print >> file}'
+              helm template "$APP_NAME" templated-manifests | awk -v out="rendered-manifests" -F": " '$0~/^# Source: /{file=$2; sub(/^[^\/]+\/templates\//, "", file); file=out"/"file; dir=file; sub(/\/[^\/]+$/, "", dir); system("mkdir -p \"" dir "\""); print > file} $0!~/^#/ && $0!="---"{print >> file}'
               
               cd - > /dev/null
             fi

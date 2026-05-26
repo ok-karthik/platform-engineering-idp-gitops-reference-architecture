@@ -19,6 +19,6 @@ jobs:
       - name: Render the manifests
         run: |
           cd apps/{{ app_name }}
-          helm template {{ app_name }} templated-manifests | awk -v out="rendered-manifests" -F": " '$0~/^# Source: /{file=out"/"$2; dir=gensub(/\/[^\/]+$/, "", "g", file); system("mkdir -p " dir); print > file} $0!~/^#/ && $0!="---"{print >> file}'
+          helm template {{ app_name }} templated-manifests | awk -v out="rendered-manifests" -F": " '$0~/^# Source: /{file=$2; sub(/^[^\/]+\/templates\//, "", file); file=out"/"file; dir=file; sub(/\/[^\/]+$/, "", dir); system("mkdir -p \"" dir "\""); print > file} $0!~/^#/ && $0!="---"{print >> file}'
 
       # Implement blue-green deployment later https://github.com/argoproj/argocd-example-apps/tree/master/blue-green
