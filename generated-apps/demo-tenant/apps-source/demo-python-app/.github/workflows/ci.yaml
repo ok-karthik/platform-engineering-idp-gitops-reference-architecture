@@ -57,8 +57,8 @@ jobs:
           context: .
           file: ./Dockerfile
           tags: |
-            ghcr.io/${{ steps.repo_name.outputs.image_name }}/demo-platform-tenant/demo-python-app:latest
-            ghcr.io/${{ steps.repo_name.outputs.image_name }}/demo-platform-tenant/demo-python-app:v${{ github.run_number }}
+            ghcr.io/${{ steps.repo_name.outputs.image_name }}/demo-tenant/demo-python-app:latest
+            ghcr.io/${{ steps.repo_name.outputs.image_name }}/demo-tenant/demo-python-app:v${{ github.run_number }}
           push: false # Set to true once registry login is configured above
 
       # ----------------------------------------------------
@@ -73,7 +73,7 @@ jobs:
       - name: Build with Buildpacks
         if: steps.check_dockerfile.outputs.exists == 'false'
         run: |
-          pack build "ghcr.io/${{ steps.repo_name.outputs.image_name }}/demo-platform-tenant/demo-python-app:latest" \
+          pack build "ghcr.io/${{ steps.repo_name.outputs.image_name }}/demo-tenant/demo-python-app:latest" \
             --path . \
             --builder paketobuildpacks/builder-jammy-base
             # Add --publish at the end once registry login is configured to push the image

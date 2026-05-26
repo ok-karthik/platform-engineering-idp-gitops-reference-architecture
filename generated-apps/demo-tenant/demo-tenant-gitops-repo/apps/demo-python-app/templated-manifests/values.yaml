@@ -1,7 +1,7 @@
 replicaCount: 1
 
 image:
-  repository: "ghcr.io/ok-karthik/platform-engineering-idp-gitops-reference-architecture/demo-platform-tenant/demo-python-app"
+  repository: "ghcr.io/ok-karthik/platform-engineering-idp-gitops-reference-architecture/demo-tenant/demo-python-app"
   pullPolicy: IfNotPresent
   tag: "latest"
 
