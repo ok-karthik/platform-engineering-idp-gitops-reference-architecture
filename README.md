@@ -6,7 +6,7 @@ This repository serves as a reference architecture for platform teams looking to
 
 ---
 
-## 🎯 Executive Summary
+## 🏗️ Architecture Summary
 
 As cloud-native architectures scale, cognitive load on product engineering teams becomes a critical bottleneck. This reference architecture implements a **Platform-as-a-Product** model using a "Control Plane" approach. 
 
@@ -51,6 +51,19 @@ To scale across hundreds of microservices, we utilize **Argo CD ApplicationSets*
 
 ---
 
+## 📂 Project Structure & Scaffolding Strategy
+
+The platform includes a custom **IDP Scaffolder Generator** (`/scaffolder-generator/`) acting as a blueprint engine. It generates boilerplate microservices, CI/CD pipelines, and GitOps configurations based on organizational best-practice templates.
+
+### Monorepo Simulator (Demo Mode)
+For simplicity and zero-setup evaluation, the generated output is stored locally within the [generated-apps](./generated-apps/README.md) directory of this repository. This simulates a monorepo setup and allows ArgoCD to sync directly from local directories.
+
+However, in a **production enterprise environment**, the platform is designed to decouple these assets into separate, isolated Git repositories (e.g., `<tenant>-<app-name>-source` and `<tenant>-gitops`).
+
+> For a deeper dive into the CI/CD orchestrator loop and how this transitions to production repository models, see the [Generated Applications & GitOps Architecture](./generated-apps/README.md) guide.
+
+---
+
 ## 🧰 Component Matrix
 
 This blueprint integrates best-in-class cloud-native tooling to form a cohesive ecosystem:
@@ -70,30 +83,25 @@ This blueprint integrates best-in-class cloud-native tooling to form a cohesive 
 
 ## 🚀 Deployment Guide (Local Demo Mode)
 
-You can spin up this entire reference architecture locally to evaluate the developer experience and platform guardrails.
+You can spin up this entire reference architecture locally to evaluate the developer experience and platform guardrails. We provide a `Makefile` to simplify the setup process.
 
 ### 1. Provision the Ephemeral Cluster
 ```bash
-# Creates a cluster and binds local ports for the Ingress controller
-k3d cluster create idp-platform \
-  --k3s-arg "--disable=traefik@server:0" \
-  -p "80:80@loadbalancer" \
-  -p "443:443@loadbalancer"
+make create-cluster
 ```
 
 ### 2. Install the GitOps Engine (Argo CD)
 ```bash
-helm upgrade --install argocd argo/argo-cd \
-  --namespace argocd \
-  --reuse-values \
-  --set server.extraArgs="{--insecure}" --create-namespace
+make install-argocd
 ```
 
 ### 3. Bootstrap the Platform
 The `bootstrap.yaml` file acts as the root of the "App of Apps" pattern. It points Argo CD to the `platform-charts/` directory to deploy all cluster add-ons simultaneously.
 ```bash
-kubectl apply -f bootstrap.yaml
+make bootstrap
 ```
+
+> **Tip:** You can also run `make setup` to perform all cluster provisioning, Argo CD installation, and bootstrapping in one command.
 
 ### 4. Scaffold a New Microservice
 Emulate a developer onboarding a new service. The generator builds the source code, pipelines, and GitOps configurations.
