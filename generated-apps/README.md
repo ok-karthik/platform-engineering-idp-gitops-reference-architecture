@@ -10,7 +10,7 @@ This directory serves as the target output zone for the platform's **Internal De
 
 ## 🗺️ Single-Repository GitOps Loop (Demo Mode)
 
-Since all code is stored in this main repository, standard nested workflow triggers won't run natively. To simulate a true multi-repo GitOps pipeline, we implement the **Single-Repository GitOps Loop** powered by a root-level orchestrator workflow ([demo-apps-ci-cd.yaml](file:///Users/karthik.orugonda/github/gitops-idp-blueprint/.github/workflows/demo-apps-ci-cd.yaml)):
+Since all code is stored in this main repository, standard nested workflow triggers won't run natively. To simulate a true multi-repo GitOps pipeline, we implement the **Single-Repository GitOps Loop** powered by a root-level orchestrator workflow ([demo-apps-ci-cd.yaml](file:///Users/karthik.orugonda/github/platform-engineering-idp-gitops-reference-architecture/.github/workflows/demo-apps-ci-cd.yaml)):
 
 ```mermaid
 graph TD

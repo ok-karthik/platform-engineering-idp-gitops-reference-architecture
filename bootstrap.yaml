@@ -7,7 +7,7 @@ metadata:
 spec:
   project: default
   source:
-    repoURL: "https://github.com/ok-karthik/gitops-idp-blueprint.git"
+    repoURL: "https://github.com/ok-karthik/platform-engineering-idp-gitops-reference-architecture.git"
     targetRevision: HEAD
     path: platform-charts # This tells Argo to apply everything inside the bootstrap folder!
   destination:

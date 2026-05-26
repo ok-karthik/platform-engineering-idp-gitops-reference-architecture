@@ -29,3 +29,5 @@ components:
     enabled: true
   tempo:
     enabled: true
+  tenantApps:
+    enabled: true
