@@ -4,8 +4,8 @@ on:
   push:
     branches:
       - main
-    paths:
-      - 'app-src/**'
+    paths-ignore:
+      - 'README.md'
 
 jobs:
   build:
@@ -20,7 +20,7 @@ jobs:
       - name: Check if Dockerfile exists
         id: check_dockerfile
         run: |
-          if [ -f "./app-src/Dockerfile" ]; then
+          if [ -f "./Dockerfile" ]; then
             echo "exists=true" >> $GITHUB_OUTPUT
             echo "Dockerfile found! Proceeding with Docker BuildKit."
           else
@@ -32,6 +32,11 @@ jobs:
       # PATH A: Build using Dockerfile (BuildKit)
       # ----------------------------------------------------
       
+      - name: Lowercase repository name
+        id: repo_name
+        run: |
+          echo "image_name=$(echo "${{ github.repository }}" | tr '[:upper:]' '[:lower:]')" >> $GITHUB_OUTPUT
+
       # Sets up Docker Buildx (which enables advanced BuildKit features)
       - name: Set up Docker Buildx
         if: steps.check_dockerfile.outputs.exists == 'true'
@@ -49,9 +54,11 @@ jobs:
         if: steps.check_dockerfile.outputs.exists == 'true'
         uses: docker/build-push-action@v5
         with:
-          context: ./app-src
-          file: ./app-src/Dockerfile
-          tags: "ghcr.io/${{ github.repository_owner }}/my-python-app:latest"
+          context: .
+          file: ./Dockerfile
+          tags: |
+            ghcr.io/${{ steps.repo_name.outputs.image_name }}/demo-platform-tenant/demo-python-app:latest
+            ghcr.io/${{ steps.repo_name.outputs.image_name }}/demo-platform-tenant/demo-python-app:v${{ github.run_number }}
           push: false # Set to true once registry login is configured above
 
       # ----------------------------------------------------
@@ -66,7 +73,7 @@ jobs:
       - name: Build with Buildpacks
         if: steps.check_dockerfile.outputs.exists == 'false'
         run: |
-          pack build "ghcr.io/${{ github.repository_owner }}/my-python-app:latest" \
-            --path ./app-src \
+          pack build "ghcr.io/${{ steps.repo_name.outputs.image_name }}/demo-platform-tenant/demo-python-app:latest" \
+            --path . \
             --builder paketobuildpacks/builder-jammy-base
             # Add --publish at the end once registry login is configured to push the image

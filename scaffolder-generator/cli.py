@@ -8,6 +8,23 @@ from binaryornot.check import is_binary
 BASE_DIR = Path(__file__).resolve().parent
 OUTPUT_DIR = BASE_DIR.parent / "generated-apps"
 
+def get_git_info():
+    import subprocess
+    try:
+        url = subprocess.check_output(["git", "config", "--get", "remote.origin.url"], text=True).strip()
+        if url.endswith(".git"):
+            url = url[:-4]
+        if ":" in url:
+            path = url.split(":")[-1]
+        else:
+            path = url.split("github.com/")[-1]
+        parts = path.split("/")
+        if len(parts) >= 2:
+            return parts[-2].lower(), parts[-1].lower()
+    except Exception:
+        pass
+    return "my-org", "platform-engineering-idp-gitops-reference-architecture"
+
 def _copy_and_render(source_dir, dest_dir, app_name, app_type, app_port, team_name, exclude_patterns=None):
     """Helper function to recursively copy files and render template fields."""
     if exclude_patterns is None:
@@ -37,8 +54,10 @@ def _copy_and_render(source_dir, dest_dir, app_name, app_type, app_port, team_na
 
             print("Rendering file: ", relative_file_path)
             template_content = source_path.read_text()
+            owner, repo = get_git_info()
             rendered_content = Template(template_content).render(
-                app_name=app_name, app_type=app_type, app_port=app_port, team_name=team_name
+                app_name=app_name, app_type=app_type, app_port=app_port, team_name=team_name,
+                github_owner=owner, github_repo=repo
             )
             dest_path.write_text(rendered_content)
         return True

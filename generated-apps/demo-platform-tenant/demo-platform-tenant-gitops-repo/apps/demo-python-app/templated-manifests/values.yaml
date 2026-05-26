@@ -1,7 +1,7 @@
 replicaCount: 1
 
 image:
-  repository: "ghcr.io/my-org/my-python-app"
+  repository: "ghcr.io/ok-karthik/platform-engineering-idp-gitops-reference-architecture/demo-platform-tenant/demo-python-app"
   pullPolicy: IfNotPresent
   tag: "latest"
 
@@ -55,7 +55,7 @@ httpRoute:
     - name: platform-gateway
       namespace: traefik
   hostnames:
-    - "my-python-app.localhost"
+    - "demo-python-app.localhost"
   rules:
     - matches:
         - path:

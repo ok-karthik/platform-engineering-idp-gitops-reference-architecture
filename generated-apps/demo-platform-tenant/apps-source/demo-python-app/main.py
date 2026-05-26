@@ -7,7 +7,7 @@ class MyHandler(SimpleHTTPRequestHandler):
             self.send_response(200)
             self.send_header('Content-type', 'text/html')
             self.end_headers()
-            message = "<h1>Hello from my-python-app!</h1>"
+            message = "<h1>Hello from demo-python-app!</h1>"
             self.wfile.write(message.encode('utf-8'))
         elif self.path == '/healthz':
             self.send_response(200)
@@ -20,7 +20,7 @@ class MyHandler(SimpleHTTPRequestHandler):
 def run(port=8080):
     server_address = ('', port)
     httpd = HTTPServer(server_address, MyHandler)
-    print(f"Starting my-python-app server on port {port}...")
+    print(f"Starting demo-python-app server on port {port}...")
     httpd.serve_forever()
 
 if __name__ == '__main__':
