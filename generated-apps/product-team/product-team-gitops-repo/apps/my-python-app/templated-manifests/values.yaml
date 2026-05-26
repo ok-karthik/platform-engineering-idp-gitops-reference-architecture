@@ -47,3 +47,17 @@ autoscaling:
 nodeSelector: {}
 tolerations: []
 affinity: {}
+
+httpRoute:
+  enabled: false
+  annotations: {}
+  parentRefs:
+    - name: platform-gateway
+      namespace: traefik
+  hostnames:
+    - "my-python-app.localhost"
+  rules:
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /
