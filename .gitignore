@@ -5,5 +5,3 @@ argocd-repositories.yaml
 **/venv/
 **/*.pyc
 **/__pycache__/
-generated-apps/
-**/generated-apps/

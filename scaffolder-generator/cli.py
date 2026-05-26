@@ -48,18 +48,18 @@ def _copy_and_render(source_dir, dest_dir, app_name, app_type, app_port, team_na
         raise RuntimeError(err_msg) from e
 
 def generate_app_template(app_name: str, app_type: str, app_port: int, team_name: str) -> bool:
-    dest_app_repo = OUTPUT_DIR / team_name / app_name / "app-repo"
-    dest_gitops_repo = OUTPUT_DIR / team_name / app_name / "gitops-repo"
+    dest_app_repo = OUTPUT_DIR / team_name / "apps-source" / app_name
+    dest_gitops_repo = OUTPUT_DIR / team_name / (team_name + "-gitops-repo") / "apps" / app_name
 
     # Mappings defining (source_dir, dest_dir, exclude_patterns)
     mappings = [
         (
-            BASE_DIR / "templates" / "app-repo-common",
+            BASE_DIR / "templates" / "app-source-repo-common",
             dest_app_repo,
             []
         ),
         (
-            BASE_DIR / "templates" / "app-repo-types" / app_type,
+            BASE_DIR / "templates" / "app-source-repo-types" / app_type,
             dest_app_repo,
             []
         ),
@@ -79,13 +79,21 @@ def generate_app_template(app_name: str, app_type: str, app_port: int, team_name
     for src, dest, exclude in mappings:
         _copy_and_render(src, dest, app_name, app_type, app_port, team_name, exclude_patterns=exclude)
 
+    # Relocate and rename the CD workflow to the shared GitOps repository root
+    src_wf = dest_gitops_repo / ".github" / "workflows" / "cd.yaml"
+    if src_wf.exists():
+        dest_wf = dest_gitops_repo.parent.parent / ".github" / "workflows" / f"cd-{app_name}.yaml"
+        dest_wf.parent.mkdir(parents=True, exist_ok=True)
+        shutil.move(str(src_wf), str(dest_wf))
+        shutil.rmtree(str(dest_gitops_repo / ".github"))  # Clean up the empty nested folder
+
     return True
 
 def list_app_templates():
-    return [template.name for template in Path(BASE_DIR / "templates/app-repo-types").iterdir() if template.is_dir()]
+    return [template.name for template in Path(BASE_DIR / "templates/app-source-repo-types").iterdir() if template.is_dir()]
 
 if __name__ == "__main__":
-    parser=argparse.ArgumentParser(usage='%(prog)s -a <app-name> -at <app-type> -p <app-port> -t <team-name>')
+    parser=argparse.ArgumentParser(usage='%(prog)s -a <app-name> -t <app-type> -p <app-port> -team <team-name>')
     parser.add_argument("-a", "--app-name", help="    <app-name> - Name of the application to be generated", required=True)
     parser.add_argument("-t", "--app-type", choices=list_app_templates(), help="    <app-type> - Type of the application to be generated", required=True)
     parser.add_argument("-p", "--app-port", help="    <app-port> - Port of the application to be generated", required=True)

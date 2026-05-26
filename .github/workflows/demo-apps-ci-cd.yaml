@@ -1,0 +1,62 @@
+name: Demo - Scaffolder CI/CD Loop
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'generated-apps/**'
+
+# Grants write permission to push the rendered manifests back to the repo
+permissions:
+  contents: write
+
+jobs:
+  run-demo-pipelines:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Install Helm
+        uses: azure/setup-helm@v4
+        with:
+          version: v3.12.0
+
+      - name: Run Manifest Rendering for Generated Apps
+        run: |
+          # Find all generated applications that have a templated-manifests directory
+          for dir in generated-apps/*/*-gitops-repo/apps/*; do
+            if [ -d "$dir/templated-manifests" ]; then
+              APP_NAME=$(basename "$dir")
+              echo "---------------------------------------------------"
+              echo "🚀 Simulating CD Pipeline for App: $APP_NAME in $dir"
+              echo "---------------------------------------------------"
+              
+              cd "$dir"
+              
+              # Clear old rendered manifests
+              rm -rf rendered-manifests/*
+              mkdir -p rendered-manifests
+              
+              # Execute Helm rendering and split output to separate files (mimics cd.yaml template)
+              helm template "$APP_NAME" templated-manifests | awk -v out="rendered-manifests" -F": " '$0~/^# Source: /{file=out"/"$2; dir=gensub(/\/[^\/]+$/, "", "g", file); system("mkdir -p " dir); print > file} $0!~/^#/ && $0!="---"{print >> file}'
+              
+              cd - > /dev/null
+            fi
+          done
+
+      - name: Commit and Push Rendered Manifests
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git add generated-apps/
+          
+          # Check if there are changes to commit
+          if git diff --staged --quiet; then
+            echo "No manifest changes detected. Skipping commit."
+          else
+            # [skip ci] prevents the action from triggering itself in an infinite loop
+            git commit -m "chore(demo): auto-render manifests for scaffolded apps [skip ci]"
+            git push
+          fi
