@@ -16,11 +16,11 @@ serviceAccount:
 
 podAnnotations:
   {% if app_type == 'springboot' -%}
-  instrumentation.opentelemetry.io/inject-java: "true"
+  instrumentation.opentelemetry.io/inject-java: "monitoring/platform-autoinstrumentation"
   {%- elif app_type == 'golang' -%}
-  instrumentation.opentelemetry.io/inject-sdk: "true"
+  instrumentation.opentelemetry.io/inject-sdk: "monitoring/platform-autoinstrumentation"
   {%- else -%}
-  instrumentation.opentelemetry.io/inject-{{ app_type }}: "true"
+  instrumentation.opentelemetry.io/inject-{{ app_type }}: "monitoring/platform-autoinstrumentation"
   {%- endif %}
 
 podLabels: 

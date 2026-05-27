@@ -19,7 +19,7 @@ spec:
   template:
     metadata:
       annotations:
-        instrumentation.opentelemetry.io/inject-python: "true"
+        instrumentation.opentelemetry.io/inject-python: "monitoring/platform-autoinstrumentation"
       labels:
         helm.sh/chart: demo-python-app-0.1.0
         app.kubernetes.io/name: demo-python-app
