@@ -1,27 +1,18 @@
-from http.server import SimpleHTTPRequestHandler, HTTPServer
+from fastapi import FastAPI
+from fastapi.responses import HTMLResponse
+import uvicorn
 import os
 
-class MyHandler(SimpleHTTPRequestHandler):
-    def do_GET(self):
-        if self.path == '/':
-            self.send_response(200)
-            self.send_header('Content-type', 'text/html')
-            self.end_headers()
-            message = "<h1>Hello from {{ app_name }}!</h1>"
-            self.wfile.write(message.encode('utf-8'))
-        elif self.path == '/healthz':
-            self.send_response(200)
-            self.send_header('Content-type', 'text/plain')
-            self.end_headers()
-            self.wfile.write(b"OK")
-        else:
-            super().do_GET()
+app = FastAPI(title="{{ app_name }}")
 
-def run(port={{ app_port }}):
-    server_address = ('', port)
-    httpd = HTTPServer(server_address, MyHandler)
-    print(f"Starting {{ app_name }} server on port {port}...")
-    httpd.serve_forever()
+@app.get("/", response_class=HTMLResponse)
+def read_root():
+    return "<h1>Hello from {{ app_name }}!</h1>"
+
+@app.get("/healthz")
+def healthz():
+    return "OK"
 
 if __name__ == '__main__':
-    run()
+    port = int(os.getenv("PORT", {{ app_port }}))
+    uvicorn.run("main:app", host="0.0.0.0", port=port, log_level="info")

@@ -15,7 +15,7 @@ serviceAccount:
   name: ""
 
 podAnnotations:
-  instrumentation.opentelemetry.io/inject-python: "monitoring/platform-autoinstrumentation"
+  instrumentation.opentelemetry.io/inject-python: "demo-python-app-autoinstrumentation"
 
 podLabels: 
   team: "demo-tenant"
