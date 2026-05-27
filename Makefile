@@ -8,7 +8,14 @@ AWS_CREDS ?= ./aws-creds.ini
 # Default target: show help
 help:
 	@echo "GitOps IDP Blueprint Makefile"
-	@echo "Usage: make <target> [CLUSTER_PROVIDER=k3d|orbstack|minikube|kind|existing] [CLUSTER_NAME=nexus-platform]"
+	@echo "Usage: make <target> [CLUSTER_PROVIDER=<provider>] [CLUSTER_NAME=<name>]"
+	@echo ""
+	@echo "Supported Providers (CLUSTER_PROVIDER):"
+	@echo "  k3d       - (Default) Provisions a local K3d cluster with Traefik disabled"
+	@echo "  orbstack  - Starts/Manages OrbStack's built-in Kubernetes engine"
+	@echo "  minikube  - Starts Minikube cluster and enables ingress addon"
+	@echo "  kind      - Provisions a Kind cluster with port mapping configuration"
+	@echo "  existing  - Targets your current kubectl context without provisioning a new cluster"
 	@echo ""
 	@echo "Targets:"
 	@echo "  up / setup      - Full setup: check deps, create cluster, install ArgoCD, bootstrap platform, configure AWS"
@@ -20,6 +27,11 @@ help:
 	@echo "  clean           - Remove deployed components (keep cluster)"
 	@echo "  destroy         - Full teardown of components and cluster"
 	@echo "  check-deps      - Validate required command-line utilities"
+	@echo ""
+	@echo "Examples:"
+	@echo "  make setup CLUSTER_PROVIDER=orbstack"
+	@echo "  make destroy CLUSTER_PROVIDER=orbstack"
+	@echo "  make bootstrap"
 
 # Conditional commands based on CLUSTER_PROVIDER
 ifeq ($(CLUSTER_PROVIDER),k3d)
@@ -29,7 +41,7 @@ CREATE_CLUSTER_CMD = k3d cluster create $(CLUSTER_NAME) \
 DELETE_CLUSTER_CMD = k3d cluster delete $(CLUSTER_NAME)
 else ifeq ($(CLUSTER_PROVIDER),orbstack)
 CREATE_CLUSTER_CMD = orbctl start k8s
-DELETE_CLUSTER_CMD = orbctl reset k8s
+DELETE_CLUSTER_CMD = orbctl delete k8s
 else ifeq ($(CLUSTER_PROVIDER),minikube)
 CREATE_CLUSTER_CMD = minikube start --profile $(CLUSTER_NAME) && minikube addons enable ingress --profile $(CLUSTER_NAME)
 DELETE_CLUSTER_CMD = minikube delete --profile $(CLUSTER_NAME)
