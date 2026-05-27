@@ -27,6 +27,7 @@ help:
 	@echo "  clean           - Remove deployed components (keep cluster)"
 	@echo "  destroy         - Full teardown of components and cluster"
 	@echo "  check-deps      - Validate required command-line utilities"
+	@echo "  get-argocd-creds - Display ArgoCD login URL, username, and password"
 	@echo ""
 	@echo "Examples:"
 	@echo "  make setup CLUSTER_PROVIDER=orbstack"
