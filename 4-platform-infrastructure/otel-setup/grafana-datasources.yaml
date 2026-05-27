@@ -5,8 +5,7 @@ metadata:
   namespace: monitoring
   labels:
     grafana_datasource: "1"
-type: Opaque
-stringData:
+data:
   datasources.yaml: |
     apiVersion: 1
     datasources:
