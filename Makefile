@@ -109,6 +109,9 @@ install-argocd:
 bootstrap:
 	@echo "Bootstrapping platform..."
 	kubectl apply -f bootstrap.yaml
+	@echo "Triggering immediate refresh/sync on all ArgoCD applications..."
+	@sleep 2
+	@kubectl get app -n argocd -o name 2>/dev/null | xargs -I {} kubectl patch {} -n argocd --type merge -p '{"metadata":{"annotations":{"argocd.argoproj.io/refresh":"normal"}}}' 2>/dev/null || true
 
 configure-aws:
 	@echo "Ensuring crossplane-system namespace exists..."

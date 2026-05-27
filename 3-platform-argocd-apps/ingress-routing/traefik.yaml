@@ -19,8 +19,6 @@ spec:
           value: "true"
         - name: "ports.traefik.expose"
           value: "true"
-        - name: "providers.kubernetesGateway.enabled"
-          value: "true"
   destination:
     server: 'https://kubernetes.default.svc'
     namespace: traefik
