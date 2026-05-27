@@ -39,16 +39,11 @@ nodeSelector: {}
 tolerations: []
 affinity: {}
 
-httpRoute:
+ingress:
   enabled: true
   annotations: {}
-  parentRefs:
-    - name: platform-gateway
-      namespace: traefik # Tells the route: "Go attach yourself to the Traefik gateway in the traefik namespace"
-  hostnames:
-    - "demo-python-app.demo-tenant.localhost"
-  rules:
-    - matches:
-        - path:
-            type: PathPrefix
-            value: /
+  hosts:
+    - host: "demo-python-app.demo-tenant.localhost"
+      paths:
+        - path: /
+          pathType: Prefix
