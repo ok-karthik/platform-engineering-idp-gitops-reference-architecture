@@ -19,15 +19,20 @@ components:
     enabled: false
   traefik:
     enabled: true
+    namespace: traefik
   argocdIngress:
     enabled: true
   loki:
     enabled: true
+    namespace: observability
   opentelemetry:
     enabled: true
+    namespace: observability
   prometheus:
     enabled: true
+    namespace: observability
   tempo:
     enabled: true
+    namespace: observability
   tenantApps:
     enabled: true

@@ -1,0 +1,54 @@
+replicaCount: 1
+
+image:
+  repository: "ghcr.io/ok-karthik/platform-engineering-idp-gitops-reference-architecture/validation-team/test-app"
+  pullPolicy: IfNotPresent
+  tag: "latest"
+
+imagePullSecrets: []
+nameOverride: ""
+fullnameOverride: ""
+
+serviceAccount:
+  create: true
+  annotations: {}
+  name: ""
+
+podAnnotations:
+  instrumentation.opentelemetry.io/inject-python: "true"
+
+podLabels: 
+  team: "validation-team"
+
+podSecurityContext: {}
+securityContext: {}
+
+service:
+  type: ClusterIP
+  port: 8000
+
+resources: {}
+
+autoscaling:
+  enabled: false
+  minReplicas: 1
+  maxReplicas: 20
+  targetCPUUtilizationPercentage: 80
+
+nodeSelector: {}
+tolerations: []
+affinity: {}
+
+httpRoute:
+  enabled: true
+  annotations: {}
+  parentRefs:
+    - name: platform-gateway
+      namespace: traefik # Tells the route: "Go attach yourself to the Traefik gateway in the traefik namespace"
+  hostnames:
+    - "test-app.validation-team.localhost"
+  rules:
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /

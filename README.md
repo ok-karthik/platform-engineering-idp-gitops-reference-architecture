@@ -17,6 +17,21 @@ By abstracting infrastructure and deployment patterns into declarative APIs and 
 
 ---
 
+## 📂 Project Structure & Reading Guide (Start Here)
+
+To make it easier to understand how this platform operates from end-to-end, the repository is logically divided into 4 chronological layers. If you are new to the platform, we recommend exploring the directories in this order:
+
+1. **`1-idp-scaffolder/` (Developer Experience)**  
+   Contains the Python CLI generator acting as the blueprint engine. It generates boilerplate microservices, CI/CD pipelines, and GitOps configurations based on organizational templates.
+2. **`2-tenant-workloads/` (Simulated Monorepo)**  
+   *Note: Previously `generated-apps/`.* This acts as the simulated tenant source and GitOps monorepo where the scaffolded workloads reside. This directory is what ArgoCD monitors for new applications.
+3. **`3-platform-argocd-apps/` (Control Plane Orchestration)**  
+   Contains the ArgoCD "App of Apps" declarations. These are the high-level wrappers that orchestrate the deployment of the underlying platform infrastructure and GitOps synchronization.
+4. **`4-platform-infrastructure/` (Control Plane Manifests)**  
+   Contains the raw Kubernetes manifests and configurations for the core platform components (e.g., Traefik, OpenTelemetry, Gateway API) deployed by the layer above.
+
+---
+
 ## 🗺️ Architectural Topologies
 
 ### 1. The GitOps Reconciliation Loop
@@ -47,20 +62,7 @@ graph TD
 ```
 
 ### 2. Zero-Touch Multi-Tenant Auto-Discovery
-To scale across hundreds of microservices, we utilize **Argo CD ApplicationSets**. Instead of manually mapping each microservice to an Argo CD `Application` resource, our ApplicationSet uses a multi-level Git directory generator (`apps/*/*-gitops-repo/apps/*`) to dynamically provision and isolate tenant applications on the fly.
-
----
-
-## 📂 Project Structure & Scaffolding Strategy
-
-The platform includes a custom **IDP Scaffolder Generator** (`/scaffolder-generator/`) acting as a blueprint engine. It generates boilerplate microservices, CI/CD pipelines, and GitOps configurations based on organizational best-practice templates.
-
-### Monorepo Simulator (Demo Mode)
-For simplicity and zero-setup evaluation, the generated output is stored locally within the [generated-apps](./generated-apps/README.md) directory of this repository. This simulates a monorepo setup and allows ArgoCD to sync directly from local directories.
-
-However, in a **production enterprise environment**, the platform is designed to decouple these assets into separate, isolated Git repositories (e.g., `<tenant>-<app-name>-source` and `<tenant>-gitops`).
-
-> For a deeper dive into the CI/CD orchestrator loop and how this transitions to production repository models, see the [Generated Applications & GitOps Architecture](./generated-apps/README.md) guide.
+To scale across hundreds of microservices, we utilize **Argo CD ApplicationSets**. Instead of manually mapping each microservice to an Argo CD `Application` resource, our ApplicationSet uses a multi-level Git directory generator (`apps/*/*-gitops-repo/apps/*`) to dynamically provision and isolate tenant applications on the fly from the `2-tenant-workloads/` directory.
 
 ---
 
@@ -96,7 +98,7 @@ make install-argocd
 ```
 
 ### 3. Bootstrap the Platform
-The `bootstrap.yaml` file acts as the root of the "App of Apps" pattern. It points Argo CD to the `platform-charts/` directory to deploy all cluster add-ons simultaneously.
+The `bootstrap.yaml` file acts as the root of the "App of Apps" pattern. It points Argo CD to the `3-platform-argocd-apps/` directory to deploy all cluster add-ons simultaneously.
 ```bash
 make bootstrap
 ```
@@ -106,12 +108,34 @@ make bootstrap
 ### 4. Scaffold a New Microservice
 Emulate a developer onboarding a new service. The generator builds the source code, pipelines, and GitOps configurations.
 ```bash
-./scaffolder-generator/.venv/bin/python ./scaffolder-generator/cli.py \
+./1-idp-scaffolder/.venv/bin/python ./1-idp-scaffolder/cli.py \
   -a my-payment-service \
   -t springboot \
   -p 8080 \
   -team finance-team
 ```
+
+---
+
+## 🛠️ Operations Guide
+
+### Updating ArgoCD Applications
+If you make changes to the YAML files inside the `3-platform-argocd-apps/` or `4-platform-infrastructure/` directories, ArgoCD is configured to automatically sync the changes from the `main` branch. 
+To manually trigger a sync or force an update without waiting for Git polling, you can apply the bootstrap file again:
+```bash
+make bootstrap
+```
+Or force a sync via the ArgoCD CLI:
+```bash
+argocd app sync platform-bootstrap
+```
+
+### Tearing Down the Cluster
+To delete the ephemeral cluster and completely destroy the environment, run:
+```bash
+make destroy
+```
+This will remove the cluster (via K3d/Kind/Minikube) and clean up all resources.
 
 ---
 

@@ -1,0 +1,15 @@
+apiVersion: opentelemetry.io/v1alpha1
+kind: Instrumentation
+metadata:
+  name: platform-autoinstrumentation
+  namespace: monitoring
+spec:
+  exporter:
+    # Point traces to the centralized Tempo service running in the monitoring namespace
+    endpoint: http://tempo.monitoring.svc.cluster.local:4317
+  propagators:
+    - tracecontext
+    - baggage
+    - b3
+  sampler:
+    type: parentbased_always_on

@@ -1,0 +1,79 @@
+name: CI Pipeline - Build & Publish
+
+on:
+  push:
+    branches:
+      - main
+    paths-ignore:
+      - 'README.md'
+
+jobs:
+  build:
+    name: Build App Image
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # Detect if a Dockerfile exists in the app source code
+      - name: Check if Dockerfile exists
+        id: check_dockerfile
+        run: |
+          if [ -f "./Dockerfile" ]; then
+            echo "exists=true" >> $GITHUB_OUTPUT
+            echo "Dockerfile found! Proceeding with Docker BuildKit."
+          else
+            echo "exists=false" >> $GITHUB_OUTPUT
+            echo "No Dockerfile found. Falling back to Cloud Native Buildpacks."
+          fi
+
+      # ----------------------------------------------------
+      # PATH A: Build using Dockerfile (BuildKit)
+      # ----------------------------------------------------
+      
+      - name: Lowercase repository name
+        id: repo_name
+        run: |
+          echo "image_name=$(echo "${{ github.repository }}" | tr '[:upper:]' '[:lower:]')" >> $GITHUB_OUTPUT
+
+      # Sets up Docker Buildx (which enables advanced BuildKit features)
+      - name: Set up Docker Buildx
+        if: steps.check_dockerfile.outputs.exists == 'true'
+        uses: docker/setup-buildx-action@v3
+
+      # Example Registry Login (uncomment when you configure secrets)
+      # - name: Log in to Docker Registry
+      #   uses: docker/login-action@v3
+      #   with:
+      #     registry: ghcr.io
+      #     username: ${{ github.actor }}
+      #     password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and Push with BuildKit
+        if: steps.check_dockerfile.outputs.exists == 'true'
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ./Dockerfile
+          tags: |
+            ghcr.io/${{ steps.repo_name.outputs.image_name }}/validation-team/test-app:latest
+            ghcr.io/${{ steps.repo_name.outputs.image_name }}/validation-team/test-app:v${{ github.run_number }}
+          push: false # Set to true once registry login is configured above
+
+      # ----------------------------------------------------
+      # PATH B: Build using Cloud Native Buildpacks
+      # ----------------------------------------------------
+
+      # Sets up the Cloud Native Buildpacks 'pack' CLI tool
+      - name: Setup pack CLI
+        if: steps.check_dockerfile.outputs.exists == 'false'
+        uses: buildpacks/github-actions/setup-pack@v5.1.0
+
+      - name: Build with Buildpacks
+        if: steps.check_dockerfile.outputs.exists == 'false'
+        run: |
+          pack build "ghcr.io/${{ steps.repo_name.outputs.image_name }}/validation-team/test-app:latest" \
+            --path . \
+            --builder paketobuildpacks/builder-jammy-base
+            # Add --publish at the end once registry login is configured to push the image

@@ -1,0 +1,24 @@
+name: CD Pipeline - Render & Push test-app
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'apps/test-app/templated-manifests/**'
+
+jobs:
+  render:
+    name: Render manifests
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Render the manifests
+        run: |
+          cd apps/test-app
+          helm template test-app templated-manifests | awk -v out="rendered-manifests" -F": " '$0~/^# Source: /{file=$2; sub(/^[^\/]+\/templates\//, "", file); file=out"/"file; dir=file; sub(/\/[^\/]+$/, "", dir); system("mkdir -p \"" dir "\""); print > file} $0!~/^#/ && $0!="---"{print >> file}'
+
+      # Implement blue-green deployment later https://github.com/argoproj/argocd-example-apps/tree/master/blue-green
