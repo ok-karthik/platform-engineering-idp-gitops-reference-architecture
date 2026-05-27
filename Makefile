@@ -3,7 +3,7 @@ CLUSTER_PROVIDER ?= k3d
 CLUSTER_NAME ?= nexus-platform
 AWS_CREDS ?= ./aws-creds.ini
 
-.PHONY: help check-deps create-cluster delete-cluster install-argocd bootstrap configure-aws up setup clean destroy get-argocd-creds
+.PHONY: help check-deps create-cluster delete-cluster install-argocd bootstrap configure-aws up setup clean destroy get-argocd-creds wait-for-apps
 
 # Default target: show help
 help:
@@ -105,10 +105,44 @@ configure-aws:
 	@echo "Creating/updating AWS credentials secret..."
 	kubectl create secret generic aws-creds -n crossplane-system --from-file=creds=$(AWS_CREDS) --dry-run=client -o yaml | kubectl apply -f -
 
-up setup: create-cluster install-argocd bootstrap configure-aws get-argocd-creds
+up setup: create-cluster install-argocd bootstrap wait-for-apps configure-aws get-argocd-creds
 	@echo "Platform setup completed successfully!"
 
+wait-for-apps:
+	@echo "Waiting for ArgoCD root application to sync..."
+	@for i in {1..30}; do \
+		STATUS=$$(kubectl -n argocd get app platform-bootstrap -o jsonpath="{.status.sync.status}" 2>/dev/null || echo "Unknown"); \
+		if [ "$$STATUS" = "Synced" ]; then break; fi; \
+		printf "."; \
+		sleep 3; \
+	done; echo ""
+	@echo "Waiting for all nested ArgoCD sub-applications to sync and become healthy..."
+	@echo "This may take a couple of minutes as images are pulled and CRDs are created."
+	@for i in {1..60}; do \
+		SYNC_STATUSES=$$(kubectl -n argocd get app -o jsonpath='{range .items[*]}{.status.sync.status}{"\n"}{end}' 2>/dev/null); \
+		HEALTH_STATUSES=$$(kubectl -n argocd get app -o jsonpath='{range .items[*]}{.status.health.status}{"\n"}{end}' 2>/dev/null); \
+		TOTAL=$$(echo "$$SYNC_STATUSES" | grep -v "^$$" | wc -l | tr -d ' ' || echo 0); \
+		SYNCED=$$(echo "$$SYNC_STATUSES" | grep -c "Synced" || echo 0); \
+		HEALTHY=$$(echo "$$HEALTH_STATUSES" | grep -c "Healthy" || echo 0); \
+		echo "Sub-apps Synced: $$SYNCED/$$TOTAL | Healthy: $$HEALTHY/$$TOTAL ..."; \
+		if [ "$$TOTAL" -gt 1 ] && [ "$$SYNCED" -eq "$$TOTAL" ] && [ "$$HEALTHY" -eq "$$TOTAL" ]; then \
+			echo "All $$TOTAL ArgoCD applications are Synced and Healthy!"; \
+			break; \
+		fi; \
+		sleep 5; \
+	done
+
 get-argocd-creds:
+	@echo "Waiting for ArgoCD initial admin secret to be generated..."
+	@for i in {1..30}; do \
+		kubectl -n argocd get secret argocd-initial-admin-secret >/dev/null 2>&1 && break; \
+		printf "."; \
+		sleep 2; \
+	done; echo ""
+	@if ! kubectl -n argocd get secret argocd-initial-admin-secret >/dev/null 2>&1; then \
+		echo "Error: ArgoCD initial admin secret was not generated in time."; \
+		exit 1; \
+	fi
 	@echo "===================================================="
 	@echo "ArgoCD Access Information:"
 	@echo "URL: http://argocd.localhost"
