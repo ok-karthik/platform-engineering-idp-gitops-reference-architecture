@@ -1,4 +1,3 @@
-from typing import Mapping
 import argparse
 from pathlib import Path
 from jinja2 import Template
