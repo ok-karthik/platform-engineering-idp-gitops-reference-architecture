@@ -1,3 +1,4 @@
+# Source: demo-python-app/templates/instrumentation.yaml
 apiVersion: opentelemetry.io/v1alpha1
 kind: Instrumentation
 metadata:
