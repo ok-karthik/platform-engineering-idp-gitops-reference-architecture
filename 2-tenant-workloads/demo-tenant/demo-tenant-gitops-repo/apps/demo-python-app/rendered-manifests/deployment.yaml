@@ -1,0 +1,39 @@
+# Source: demo-python-app/templates/deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: demo-python-app
+  labels:
+    helm.sh/chart: demo-python-app-0.1.0
+    app.kubernetes.io/name: demo-python-app
+    app.kubernetes.io/instance: demo-python-app
+    app.kubernetes.io/version: "1.0.0"
+    app.kubernetes.io/managed-by: Helm
+    team: demo-tenant
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: demo-python-app
+      app.kubernetes.io/instance: demo-python-app
+  template:
+    metadata:
+      annotations:
+        instrumentation.opentelemetry.io/inject-python: "true"
+      labels:
+        helm.sh/chart: demo-python-app-0.1.0
+        app.kubernetes.io/name: demo-python-app
+        app.kubernetes.io/instance: demo-python-app
+        app.kubernetes.io/version: "1.0.0"
+        app.kubernetes.io/managed-by: Helm
+        team: demo-tenant
+    spec:
+      serviceAccountName: demo-python-app
+      containers:
+        - name: demo-python-app
+          image: "ghcr.io/ok-karthik/platform-engineering-idp-gitops-reference-architecture/demo-tenant/demo-python-app:latest"
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: http
+              containerPort: 8080
+              protocol: TCP

@@ -1,0 +1,22 @@
+# Source: demo-python-app/templates/service.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: demo-python-app
+  labels:
+    helm.sh/chart: demo-python-app-0.1.0
+    app.kubernetes.io/name: demo-python-app
+    app.kubernetes.io/instance: demo-python-app
+    app.kubernetes.io/version: "1.0.0"
+    app.kubernetes.io/managed-by: Helm
+    team: demo-tenant
+spec:
+  type: ClusterIP
+  ports:
+    - port: 8080
+      targetPort: http
+      protocol: TCP
+      name: http
+  selector:
+    app.kubernetes.io/name: demo-python-app
+    app.kubernetes.io/instance: demo-python-app
