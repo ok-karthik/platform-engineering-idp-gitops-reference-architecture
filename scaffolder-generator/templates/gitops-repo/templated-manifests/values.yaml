@@ -33,23 +33,12 @@ service:
   type: ClusterIP
   port: {{ app_port }}
 
-ingress:
-  enabled: false
-  className: ""
-  annotations: {}
-  hosts:
-    - host: chart-example.local
-      paths:
-        - path: /
-          pathType: ImplementationSpecific
-  tls: []
-
 resources: {}
 
 autoscaling:
   enabled: false
   minReplicas: 1
-  maxReplicas: 100
+  maxReplicas: 20
   targetCPUUtilizationPercentage: 80
 
 nodeSelector: {}
@@ -57,13 +46,13 @@ tolerations: []
 affinity: {}
 
 httpRoute:
-  enabled: false
+  enabled: true
   annotations: {}
   parentRefs:
     - name: platform-gateway
-      namespace: traefik
+      namespace: traefik # Tells the route: "Go attach yourself to the Traefik gateway in the traefik namespace"
   hostnames:
-    - "{{ app_name }}.localhost"
+    - "{{ app_name }}.{{ team_name }}.localhost"
   rules:
     - matches:
         - path:

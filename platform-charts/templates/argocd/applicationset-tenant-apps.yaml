@@ -22,7 +22,7 @@ spec:
         path: '{{`{{path}}`}}/rendered-manifests'
       destination:
         server: {{ .Values.spec.destination.server }}
-        namespace: '{{`{{path.basename}}`}}'
+        namespace: '{{`{{path[1]}}`}}'
       syncPolicy:
         automated:
           prune: true
