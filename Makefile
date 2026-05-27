@@ -8,12 +8,12 @@ AWS_CREDS ?= ./aws-creds.ini
 # Default target: show help
 help:
 	@echo "GitOps IDP Blueprint Makefile"
-	@echo "Usage: make <target> [CLUSTER_PROVIDER=k3d|minikube|kind|existing] [CLUSTER_NAME=nexus-platform]"
+	@echo "Usage: make <target> [CLUSTER_PROVIDER=k3d|orbstack|minikube|kind|existing] [CLUSTER_NAME=nexus-platform]"
 	@echo ""
 	@echo "Targets:"
 	@echo "  up / setup      - Full setup: check deps, create cluster, install ArgoCD, bootstrap platform, configure AWS"
-	@echo "  create-cluster  - Provision Kubernetes cluster using specified provider"
-	@echo "  delete-cluster  - Delete the provisioned Kubernetes cluster"
+	@echo "  create-cluster  - Provision/start Kubernetes cluster using specified provider"
+	@echo "  delete-cluster  - Delete/reset the provisioned Kubernetes cluster"
 	@echo "  install-argocd  - Install ArgoCD via Helm"
 	@echo "  bootstrap       - Bootstrap platform applications using ArgoCD"
 	@echo "  configure-aws   - Create AWS credentials secret in crossplane-system namespace"
@@ -27,6 +27,9 @@ CREATE_CLUSTER_CMD = k3d cluster create $(CLUSTER_NAME) \
 	--k3s-arg "--disable=traefik@server:*" \
 	-p "80:80@loadbalancer" -p "443:443@loadbalancer"
 DELETE_CLUSTER_CMD = k3d cluster delete $(CLUSTER_NAME)
+else ifeq ($(CLUSTER_PROVIDER),orbstack)
+CREATE_CLUSTER_CMD = orbctl start k8s
+DELETE_CLUSTER_CMD = orbctl reset k8s
 else ifeq ($(CLUSTER_PROVIDER),minikube)
 CREATE_CLUSTER_CMD = minikube start --profile $(CLUSTER_NAME) && minikube addons enable ingress --profile $(CLUSTER_NAME)
 DELETE_CLUSTER_CMD = minikube delete --profile $(CLUSTER_NAME)
@@ -44,6 +47,8 @@ check-deps:
 	@which helm > /dev/null || (echo "Error: helm is not installed" && exit 1)
 ifeq ($(CLUSTER_PROVIDER),k3d)
 	@which k3d > /dev/null || (echo "Error: k3d is not installed" && exit 1)
+else ifeq ($(CLUSTER_PROVIDER),orbstack)
+	@which orbctl > /dev/null || (echo "Error: orbctl is not installed" && exit 1)
 else ifeq ($(CLUSTER_PROVIDER),minikube)
 	@which minikube > /dev/null || (echo "Error: minikube is not installed" && exit 1)
 else ifeq ($(CLUSTER_PROVIDER),kind)
@@ -107,5 +112,10 @@ clean:
 	kubectl delete namespace argocd --ignore-not-found=true
 	kubectl delete secret aws-creds -n crossplane-system --ignore-not-found=true
 
-destroy: clean delete-cluster
+destroy:
+ifeq ($(CLUSTER_PROVIDER),existing)
+	$(MAKE) clean
+else
+	$(MAKE) delete-cluster
+endif
 	@echo "Platform completely destroyed!"
