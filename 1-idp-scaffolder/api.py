@@ -5,7 +5,7 @@ from fastapi.responses import JSONResponse
 from pydantic import BaseModel, Field
 from enum import Enum
 
-api = FastAPI()
+api = FastAPI(title="Scaffolder API", description="Scaffolding tools to create and deploy applications")
 
 @api.exception_handler(RequestValidationError)
 async def validation_exception_handler(request: Request, exc: RequestValidationError):
@@ -30,8 +30,9 @@ async def validation_exception_handler(request: Request, exc: RequestValidationE
         content={"detail": "Validation failed", "errors": formatted_errors}
     )
 
-templates = cli.list_app_templates()
-AppType = Enum("AppType", {t: t for t in templates}, type=str)
+AppType = Enum("AppType", {t: t for t in cli.list_app_templates()}, type=str)
+
+CloudServices = Enum("CloudService", {t: t for t in cli.list_cloud_services()}, type=str)
 
 # Validate the input details datatypes and ensure the data is sent via JSON body rather than URL parameters
 class App(BaseModel):
@@ -43,15 +44,20 @@ class App(BaseModel):
     app_type: AppType
     app_port: int = Field(default=8080, ge=0, le=65535, description="Port number of the application to be generated")
     team_name: str = Field(min_length=2, max_length=40, pattern=r"^[a-z0-9][-a-z0-9]*[a-z0-9]$", description="Team/Tenant name of the application to be generated")
-    
-@api.get("/")
-async def root():
+    cloud_services: list[CloudServices] = []
+
+@api.get("/api/v1/cloud-services")
+async def get_cloud_services():
+    return [cloud_service.value for cloud_service in CloudServices]
+
+@api.get("/api/v1/apps")
+async def get_app_templates():
     return {"app_templates": cli.list_app_templates()}
 
-@api.post("/generate-app")
+@api.post("/api/v1/apps")
 def generate_app(app: App):
     try:
-        cli.generate_app_template(**app.model_dump())
+        cli.generate_app_template(**app.model_dump(mode='json'))
         return {"message": "App generated successfully"}
     except HTTPException as he:
         raise he

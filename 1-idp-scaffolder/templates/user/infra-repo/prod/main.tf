@@ -1,0 +1,34 @@
+locals = {
+    resource_name_prefix = "{{team_name}}-{{app_name}}"
+    tags = {
+        Team        = "{{team_name}}"
+        Service     = "{{app_name}}"
+        ManagedBy   = "terraform"
+        Owner       = "{{team_name}}"
+    }
+}
+
+## Tenant Idempotent Infrastructure Modules ## - Do not remove these - Danger zone start!
+module "aws-vpc" {
+    source    = "git::https://github.com/ok-karthik/platform-engineering-idp-gitops-reference-architecture.git//templates/platform/cloud-services/aws-networking?ref=main"
+    team_name = "{{team_name}}"
+    app_name  = "{{app_name}}"
+    vpc_cidr  = "{{vpc_cidr}}"
+}
+
+module "aws-iam" {
+    source    = "git::https://github.com/ok-karthik/platform-engineering-idp-gitops-reference-architecture.git//templates/platform/cloud-services/aws-iam?ref=main"
+    team_name = "{{team_name}}"
+    app_name  = "{{app_name}}"
+}
+## Tenant Idempotent Infrastructure Modules ## - Do not remove these - Danger zone end!
+
+{% if cloud_services %}
+{% for service in cloud_services %}
+module "{{ service }}" {
+    source    = "git::https://github.com/ok-karthik/platform-engineering-idp-gitops-reference-architecture.git//templates/platform/cloud-services/{{ service }}?ref=main"
+    team_name = "{{team_name}}"
+    app_name  = "{{app_name}}"
+}
+{% endfor %}
+{% endif %}

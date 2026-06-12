@@ -1,0 +1,1 @@
+"Note: For the ease of local demonstration, the Terraform templates are stored locally in the scaffolder. In a production enterprise platform, these would be referenced from a central Git Registry or Terraform Private Module Registry with version pinning (e.g., source = "git::https://github.com/org/terraform-aws-s3.git?ref=v1.2.0")."
