@@ -1,7 +1,7 @@
 import typer, copier
 from pathlib import Path
 import shutil
-import yaml, logger
+import yaml
 from typing import Annotated
 import schemas, utils
 
