@@ -40,5 +40,3 @@ _exclude:
 
 _skip_if_exists:
   - "{{team_name}}/infra-repo/*/team-base.tf"
-  - "{{team_name}}/infra-repo/.github/workflows/cd.yaml"
-  - "{{team_name}}/gitops-repo/.github/workflows/cd.yaml"

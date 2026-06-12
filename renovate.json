@@ -11,6 +11,14 @@
         "REMOTE_TEMPLATE_REPO = \"https://github\\.com/(?<depName>[^/]+/[^/@]+)@version=(?<currentValue>v[0-9.]+.*)\""
       ],
       "datasourceTemplate": "github-tags"
+    },
+    {
+      "customType": "regex",
+      "fileMatch": ["\\.tf\\.jinja$"],
+      "matchStrings": [
+        "source\\s*=\\s*\"git::https://github\\.com/(?<depName>[^/]+/[^/]+?)\\.git//.*?\\?ref=(?<currentValue>v[0-9.]+.*)\""
+      ],
+      "datasourceTemplate": "github-tags"
     }
   ],
   "packageRules": [

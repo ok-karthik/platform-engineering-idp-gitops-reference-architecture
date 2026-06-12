@@ -13,6 +13,7 @@ As cloud-native architectures scale, cognitive load on product engineering teams
 By abstracting infrastructure and deployment patterns into declarative APIs and standardized templates, we enable:
 * **Zero-Touch Provisioning:** Microservices are scaffolded and instantly deployed without platform team intervention.
 * **Soft Multi-Tenancy:** Automated isolation of namespaces, network policies, and progressive delivery pipelines per product team.
+* **Idempotent Infrastructure:** Splitting shared team infrastructure from app-specific infrastructure ensures manual Terraform modifications are safely preserved during subsequent app onboarding.
 * **Guardrails over Gates:** Pre-flight compliance and security enforcement through admission controllers (Kyverno) rather than manual ticket reviews.
 
 ---
@@ -80,6 +81,7 @@ This blueprint integrates best-in-class cloud-native tooling to form a cohesive 
 | **Edge Gateway** | **Traefik** | L7 ingress, API gateway, rate-limiting, and middleware injection. |
 | **Secrets Ops** | **Sealed Secrets** | Asymmetric encryption enabling safe storage of secrets in Git. |
 | **Observability** | **Grafana Stack**| Unified metrics (Prometheus), logs (Loki), and traces (Tempo). |
+| **Dep. Management**| **Renovate** | Automated dependency bumps for Terraform modules, Helm charts, and Python packages via custom Regex Managers. |
 
 ---
 

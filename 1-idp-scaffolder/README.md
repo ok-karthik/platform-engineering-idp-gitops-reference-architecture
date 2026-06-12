@@ -13,19 +13,29 @@ Instead of single-shot text replacement, the scaffolder splits scaffolding into 
 * **Pass 1: Common Platform Layout**: Orchestrated by [Copier](https://copier.readthedocs.io/) using `templates/tenant-template/`. This establishes the team's shared workspaces, GitOps repositories, GitHub Action CD pipelines, and environmental directories (`dev/` and `prod/` Terraform configurations).
 * **Pass 2: Language-Specific App Blueprint**: Evaluated from `templates/apps-source/` (e.g. Python, Go, Node.js, Spring Boot) to generate the starter microservice code itself under the team's `apps-source/` directory.
 
-### 2. Strictly Validated API/CLI Contracts (Pydantic Layer)
+### 2. Idempotent Infrastructure Scaffolding
+To ensure that product teams can safely add manual configurations (e.g., custom S3 buckets, SQS queues) without the scaffolder overwriting their work on subsequent runs:
+* Infrastructure is split into shared `team-base.tf` and app-specific `{{app_name}}.tf` files.
+* Copier's `_skip_if_exists` rule protects the shared base files, allowing safe, multi-app scaffolding within the same repository without merge conflicts.
+
+### 3. Automated Dependency Management (Renovate)
+The entire platform relies on **RenovateBot** to stay secure and up to date:
+* Natively bumps Python (`pyproject.toml`, `uv.lock`) and deployed Terraform workloads.
+* Utilizes **Custom Regex Managers** (`renovate.json`) to dynamically scan and update the `vX.Y.Z` Git module references embedded deeply within `.tf.jinja` template files and python scaffolding logic.
+
+### 4. Strictly Validated API/CLI Contracts (Pydantic Layer)
 To ensure platform stability and prevent invalid Kubernetes/cloud resource creation, all inputs are parsed and validated by a robust Pydantic data layer (`schemas.py`):
 * **Strict Port Validation**: Microservice ports must be within standard non-system ranges (`1024-65535`).
 * **RFC-Compliant Naming Rules**: Team and application names must conform to lowercase alphanumeric characters and hyphens (DNS compliance).
 * **Type Safety & Cloud Enums**: Restricts selected cloud services to supported platform-managed modules (e.g. `aws-s3`, `aws-postgres`).
 
-### 3. State-Preserving IPAM System
+### 5. State-Preserving IPAM System
 To enable seamless multi-tenant cloud architectures, the scaffolder features a **Deterministic IP Address Management (IPAM)** engine:
 * Automatically reads, updates, and saves tenant allocations in a central state file (`2-tenant-workloads/cloud_vpcs_allocated.yaml`).
 * Assigns non-overlapping `/16` CIDR blocks (starting from `10.0.0.0/16`) to each new tenant VPC.
 * Guarantees network safety and prevents peer-routing collisions during AWS/multi-cloud VPC peering.
 
-### 4. GitOps Separation of Concerns (Helm Source vs Rendered Manifests)
+### 6. GitOps Separation of Concerns (Helm Source vs Rendered Manifests)
 To optimize ArgoCD performance and enhance auditability, the generated repository structure strictly separates source Helm charts from rendered Kubernetes configurations:
 * **Source (`helm-charts/`)**: Holds the parameterized Helm templates, `values.yaml`, and `Chart.yaml` for developer modifications.
 * **Rendered (`rendered-manifests/`)**: Used by the GitOps agent (ArgoCD). During a CI/CD run, the GitHub Action automatically executes `helm template` against the source and writes flat, raw Kubernetes manifests into the rendered directory, committing them back to Git.

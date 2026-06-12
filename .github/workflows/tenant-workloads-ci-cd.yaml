@@ -1,0 +1,106 @@
+name: Tenant Workloads - CI/CD Pipeline
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - '2-tenant-workloads/**'
+
+# Grants write permission to push the rendered manifests back to the repo and publish images to GHCR
+permissions:
+  contents: write
+  packages: write
+
+jobs:
+  run-tenant-pipelines:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Install Helm
+        uses: azure/setup-helm@v4
+        with:
+          version: v3.12.0
+
+      - name: Lowercase repository name
+        id: repo_name
+        run: |
+          echo "image_name=$(echo "${{ github.repository }}" | tr '[:upper:]' '[:lower:]')" >> $GITHUB_OUTPUT
+
+      - name: Setup pack CLI
+        uses: buildpacks/github-actions/setup-pack@v5.1.0
+
+      # Optional: Log in to GitHub Container Registry (Uncomment when ready to publish)
+      # - name: Log in to GitHub Container Registry
+      #   uses: docker/login-action@v3
+      #   with:
+      #     registry: ghcr.io
+      #     username: ${{ github.actor }}
+      #     password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Run CI/CD Pipelines for Generated Apps
+        run: |
+          # Find all generated applications that have a templated-manifests directory
+          for dir in 2-tenant-workloads/*/*-gitops-repo/helm-charts/*; do
+            if [ -d "$dir" ]; then
+              TENANT_NAME=$(echo "$dir" | awk -F'/' '{print $2}')
+              APP_NAME=$(basename "$dir")
+              SRC_DIR="2-tenant-workloads/$TENANT_NAME/apps-source/$APP_NAME"
+              
+              echo "==================================================="
+              echo "🚀 Running Pipelines for App: $APP_NAME ($TENANT_NAME)"
+              echo "==================================================="
+              
+              # 1. Simulate CI Pipeline (Image Build)
+              if [ -d "$SRC_DIR" ]; then
+                echo "---------------------------------------------------"
+                echo "📦 Building Docker Image"
+                echo "---------------------------------------------------"
+                
+                IMAGE_TAG_LATEST="ghcr.io/${{ steps.repo_name.outputs.image_name }}/$TENANT_NAME/$APP_NAME:latest"
+                IMAGE_TAG_RUN="ghcr.io/${{ steps.repo_name.outputs.image_name }}/$TENANT_NAME/$APP_NAME:v${{ github.run_number }}"
+                
+                if [ -f "$SRC_DIR/Dockerfile" ]; then
+                  echo "Dockerfile found. Building with BuildKit..."
+                  docker build -t "$IMAGE_TAG_LATEST" -t "$IMAGE_TAG_RUN" -f "$SRC_DIR/Dockerfile" "$SRC_DIR"
+                  # docker push "$IMAGE_TAG_LATEST"
+                  # docker push "$IMAGE_TAG_RUN"
+                else
+                  echo "No Dockerfile found. Building with Cloud Native Buildpacks..."
+                  pack build "$IMAGE_TAG_LATEST" --path "$SRC_DIR" --builder paketobuildpacks/builder-jammy-base
+                  docker tag "$IMAGE_TAG_LATEST" "$IMAGE_TAG_RUN"
+                  # docker push "$IMAGE_TAG_LATEST"
+                  # docker push "$IMAGE_TAG_RUN"
+                fi
+              fi
+              
+              # 2. Simulate CD Pipeline (Manifest Rendering)
+              echo "---------------------------------------------------"
+              echo "☸️ Rendering Helm Manifests"
+              echo "---------------------------------------------------"
+              cd "2-tenant-workloads/$TENANT_NAME/gitops-repo/"
+              rm -rf rendered-manifests/$APP_NAME || true
+              mkdir -p rendered-manifests/$APP_NAME
+              helm template "$APP_NAME" helm-charts/$APP_NAME \
+                --set image.repository="ghcr.io/${{ steps.repo_name.outputs.image_name }}/$TENANT_NAME/$APP_NAME" \
+                > rendered-manifests/$APP_NAME/rendered.yaml
+              cd - > /dev/null
+            fi
+          done
+
+      - name: Commit and Push Rendered Manifests
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git add 2-tenant-workloads/
+          
+          # Check if there are changes to commit
+          if git diff --staged --quiet; then
+            echo "No manifest changes detected. Skipping commit."
+          else
+            # [skip ci] prevents the action from triggering itself in an infinite loop
+            git commit -m "chore(platform): auto-render manifests for scaffolded apps [skip ci]"
+            git push
+          fi
