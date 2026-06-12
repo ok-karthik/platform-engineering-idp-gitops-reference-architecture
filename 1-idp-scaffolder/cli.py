@@ -1,43 +1,38 @@
 import typer, copier
-from pathlib import Path
-import shutil
-import yaml
 from typing import Annotated
 import schemas, utils
 
 from pydantic import ValidationError
 
-# Absolute path to the directory containing this script (e.g., ".../1-idp-scaffolder")
-BASE_DIR: Path = Path(__file__).resolve().parent
-# Target output directory (e.g., ".../2-tenant-workloads")
-OUTPUT_DIR: Path = BASE_DIR.parent / "2-tenant-workloads"
 DEFAULT_CLOUD_SERVICES = ["aws-vpc", "aws-iam"]
 
-
-def generate_app_template(app_name: str, app_type: str, app_port: int, team_name: str, cloud_services: list[str] = list()) -> bool:
-    """Generate app template
+def scaffold_tenant_workload(app_name: str, app_type: str, app_port: int, team_name: str, cloud_services: list[str] = list()) -> bool:
+    """Scaffolds the workspace directory, helm charts, and starting code for a tenant application.
     
     Args:
         app_name: Name of the application to be generated
-        app_type: Type of the application to be generated
-        app_port: Port of the application to be generated
-        team_name: Team/Tenant name
-        cloud_services: List of cloud services to be included in the workload
+        app_type: Type of the application (e.g. python, golang)
+        app_port: Port the application listens on
+        team_name: Tenant/Team namespace
+        cloud_services: Supported cloud service modules to enable
         
     Returns:
-        True if the app template was generated successfully, False otherwise
+        True if the scaffolding was completed successfully
     """
-    # VPC IP range creation
-    vpc_cidr = utils.get_or_allocate_vpc_cidr(team_name)
+    # IPAM Network Allocation
+    vpc_cidr = utils.allocate_vpc_cidr_block(team_name)
     print(f"Allocated VPC CIDR: {vpc_cidr}")
 
-    # Pass 1: Generate the entire team workspace structure and common files
+    # Resolve the template base directory (supports local fallback or cloned remote repository)
+    template_base_dir = utils.get_template_base_dir()
+
+    # Pass 1: Scaffold common team infrastructure & GitOps workflows
     copier.run_copy(
-        str(BASE_DIR / "templates" / "project-common"),
-        str(OUTPUT_DIR),
+        str(template_base_dir / "templates" / "tenant-template"),
+        str(utils.TENANT_WORKLOADS_DIR),
         data={
             "team_name": team_name,
-            "tenant_name": team_name, # support both keys
+            "tenant_name": team_name,
             "app_name": app_name,
             "app_type": app_type,
             "app_port": app_port,
@@ -48,10 +43,10 @@ def generate_app_template(app_name: str, app_type: str, app_port: int, team_name
         defaults=True
     )
 
-    # Pass 2: Inject the language-specific files directly into the root of the app source folder
+    # Pass 2: Inject the language starter application files
     copier.run_copy(
-        str(BASE_DIR / "templates" / "languages" / app_type),
-        str(OUTPUT_DIR / team_name / "apps-source" / app_name),
+        str(template_base_dir / "templates" / "apps-source" / app_type),
+        str(utils.TENANT_WORKLOADS_DIR / team_name / "apps-source" / app_name),
         data={
             "team_name": team_name,
             "tenant_name": team_name,
@@ -83,10 +78,9 @@ def create(
         )
     except ValidationError as e:
         typer.echo("Error: Validation failed.")
-        print(e.errors())
         for error in e.errors():
             loc = " -> ".join(str(x) for x in error["loc"])
             typer.echo(f"  - {loc}: {error['msg']}")
         raise typer.Exit(code=1)
 
-    generate_app_template(**validated_data.model_dump(mode="json"))
+    scaffold_tenant_workload(**validated_data.model_dump(mode="json"))

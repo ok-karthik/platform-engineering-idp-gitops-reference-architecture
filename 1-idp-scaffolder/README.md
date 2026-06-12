@@ -10,8 +10,8 @@ This component acts as the **Control Plane / Developer Experience Layer (Layer 1
 
 ### 1. Two-Pass Template Rendering Pattern
 Instead of single-shot text replacement, the scaffolder splits scaffolding into two discrete passes:
-* **Pass 1: Common Platform Layout**: Orchestrated by [Copier](https://copier.readthedocs.io/) using `templates/project-common/`. This establishes the team's shared workspaces, GitOps repositories, GitHub Action CD pipelines, and environmental directories (`dev/` and `prod/` Terraform configurations).
-* **Pass 2: Language-Specific App Blueprint**: Evaluated from `templates/languages/` (e.g. Python, Go, Node.js, Spring Boot) to generate the starter microservice code itself under the team's `apps-source/` directory.
+* **Pass 1: Common Platform Layout**: Orchestrated by [Copier](https://copier.readthedocs.io/) using `templates/tenant-template/`. This establishes the team's shared workspaces, GitOps repositories, GitHub Action CD pipelines, and environmental directories (`dev/` and `prod/` Terraform configurations).
+* **Pass 2: Language-Specific App Blueprint**: Evaluated from `templates/apps-source/` (e.g. Python, Go, Node.js, Spring Boot) to generate the starter microservice code itself under the team's `apps-source/` directory.
 
 ### 2. Strictly Validated API/CLI Contracts (Pydantic Layer)
 To ensure platform stability and prevent invalid Kubernetes/cloud resource creation, all inputs are parsed and validated by a robust Pydantic data layer (`schemas.py`):
@@ -53,8 +53,9 @@ To optimize ArgoCD performance and enhance auditability, the generated repositor
 ├── pyproject.toml            # Package metadata and CLI entrypoint registrations
 ├── uv.lock                   # Deterministic package dependency lockfile
 └── templates/
-    ├── project-common/       # Common platform templates (Terraform, GitOps workflows, Helm charts)
-    └── languages/            # Language-specific starter microservices
+    ├── apps-source/          # Language-specific starter microservices
+    ├── cloud-services/       # Terraform modules for AWS services
+    └── tenant-template/      # Common platform templates (Terraform, GitOps workflows, Helm charts)
 ```
 
 ---

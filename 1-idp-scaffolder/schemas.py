@@ -1,12 +1,10 @@
 from enum import Enum
 from pydantic import BaseModel, Field, ValidationError
-from pathlib import Path
-import yaml
 import utils
 
-AppType = Enum("AppType", {t: t for t in utils.list_app_templates()}, type=str)
+AppType = Enum("AppType", {t: t for t in utils.list_available_app_types()}, type=str)
 
-CloudServices = Enum("CloudService", {t: t for t in utils.list_cloud_service_templates()}, type=str)
+CloudServices = Enum("CloudService", {t: t for t in utils.list_available_cloud_services()}, type=str)
 
 # Validate the input details datatypes and ensure the data is sent via JSON body rather than URL parameters
 class AppDetails(BaseModel):
