@@ -5,3 +5,10 @@ argocd-repositories.yaml
 **/venv/
 **/*.pyc
 **/__pycache__/
+*.egg-info/
+**/*.egg-info/
+build/
+dist/
+.pytest_cache/
+.coverage
+htmlcov/
