@@ -43,7 +43,7 @@ jobs:
       - name: Run CI/CD Pipelines for Generated Apps
         run: |
           # Find all generated applications that have a templated-manifests directory
-          for dir in 2-tenant-workloads/*/*-gitops-repo/helm-charts/*; do
+          for dir in 2-tenant-workloads/*/gitops-repo/helm-charts/*; do
             if [ -d "$dir" ]; then
               TENANT_NAME=$(echo "$dir" | awk -F'/' '{print $2}')
               APP_NAME=$(basename "$dir")
