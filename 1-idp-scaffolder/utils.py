@@ -12,7 +12,7 @@ TENANT_WORKLOADS_DIR: Path = SCAFFOLDER_PKG_ROOT.parent / "2-tenant-workloads"
 DEFAULT_CLOUD_SERVICES = ["aws-networking", "aws-iam"]
 IPAM_REGISTRY_FILE = TENANT_WORKLOADS_DIR / "cloud_vpcs_allocated.yaml"
 
-REMOTE_TEMPLATE_REPO = "https://github.com/ok-karthik/platform-engineering-idp-gitops-reference-architecture@version=v1.0.0"
+REMOTE_TEMPLATE_REPO = "https://github.com/ok-karthik/platform-engineering-idp-gitops-reference-architecture@version=v1.0.2"
 
 def get_template_base_dir() -> Path:
     """Gets the path to the template base directory.
