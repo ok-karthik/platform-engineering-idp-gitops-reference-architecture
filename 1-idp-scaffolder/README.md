@@ -73,21 +73,23 @@ make install-scaffolder
 To scaffold a new microservice for a team (including dedicated VPC CIDR block, Terraform code, microservice template, Helm charts, and CI/CD pipelines):
 
 ```bash
+# Provide multiple --cloud-services (or -cs) flags for each service
 scaffolder create \
   --app-name my-python-app \
   --app-type python \
   --app-port 8080 \
   --team-name team-a \
-  --cloud-services aws-s3,aws-postgres
+  --cloud-services aws-s3 \
+  --cloud-services aws-postgres
 ```
 
-*Note: You can pass cloud services as a comma-separated list (`aws-s3,aws-postgres`) or as multiple flags (`-cs aws-s3 -cs aws-postgres`).*
+*Note: Typer parses list options by repeating the flag (e.g., `-cs aws-s3 -cs aws-postgres`). Passing comma-separated lists (e.g., `aws-s3,aws-postgres`) is not supported.*
 
-### 3. Expose the API (FastAPI)
-Run the control-plane web API local daemon:
+### 3. Alternative: Run as a REST API (FastAPI)
+If you prefer exposing the scaffolder as a web service (e.g., to integrate it with a developer portal UI like Spotify Backstage), you can run the FastAPI application:
 
 ```bash
-# Starts the FastAPI server
+# Starts the local FastAPI web server
 make run-api
 ```
-Access the interactive OpenAPI Documentation at **[http://127.0.0.1:8000/docs](http://127.0.0.1:8000/docs)** to trigger microservice creation via REST endpoints.
+Once started, you can access the interactive OpenAPI Documentation at **[http://127.0.0.1:8000/docs](http://127.0.0.1:8000/docs)** to trigger microservice creation via API requests.
