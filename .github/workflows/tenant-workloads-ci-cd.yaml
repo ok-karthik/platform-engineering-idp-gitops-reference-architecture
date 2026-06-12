@@ -6,6 +6,7 @@ on:
       - main
     paths:
       - '2-tenant-workloads/**'
+      - '.github/workflows/tenant-workloads-ci-cd.yaml'
 
 # Grants write permission to push the rendered manifests back to the repo and publish images to GHCR
 permissions:
