@@ -1,3 +1,4 @@
+import typer
 import yaml
 from pathlib import Path
 import subprocess
@@ -62,7 +63,7 @@ def get_template_base_dir() -> Path:
 
 def list_available_app_types() -> list[str]:
     """List all available app types"""
-    languages_dir = get_template_base_dir() / "templates" / "languages"
+    languages_dir = get_template_base_dir() / "templates" / "apps-source"
     if not languages_dir.exists():
         raise FileNotFoundError(f"Templates directory not found at: {languages_dir}")
     return [template.name for template in languages_dir.iterdir() if template.is_dir()]
@@ -112,5 +113,6 @@ def allocate_vpc_cidr_block(team_name: str) -> str:
     TENANT_WORKLOADS_DIR.mkdir(parents=True, exist_ok=True)
     with open(IPAM_REGISTRY_FILE, "w") as f:
         yaml.safe_dump(cloud_vpcs_allocated, f)
+        typer.echo(f"Allocated VPC CIDR: {vpc_cidr}")
         
     return vpc_cidr

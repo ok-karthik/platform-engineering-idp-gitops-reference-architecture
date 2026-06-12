@@ -21,7 +21,6 @@ def scaffold_tenant_workload(app_name: str, app_type: str, app_port: int, team_n
     """
     # IPAM Network Allocation
     vpc_cidr = utils.allocate_vpc_cidr_block(team_name)
-    print(f"Allocated VPC CIDR: {vpc_cidr}")
 
     # Resolve the template base directory (supports local fallback or cloned remote repository)
     template_base_dir = utils.get_template_base_dir()
