@@ -33,13 +33,12 @@ jobs:
       - name: Setup pack CLI
         uses: buildpacks/github-actions/setup-pack@v5.12.4
 
-      # Optional: Log in to GitHub Container Registry (Uncomment when ready to publish)
-      # - name: Log in to GitHub Container Registry
-      #   uses: docker/login-action@v3
-      #   with:
-      #     registry: ghcr.io
-      #     username: ${{ github.actor }}
-      #     password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Run CI/CD Pipelines for Generated Apps
         run: |
@@ -66,14 +65,14 @@ jobs:
                 if [ -f "$SRC_DIR/Dockerfile" ]; then
                   echo "Dockerfile found. Building with BuildKit..."
                   docker build -t "$IMAGE_TAG_LATEST" -t "$IMAGE_TAG_RUN" -f "$SRC_DIR/Dockerfile" "$SRC_DIR"
-                  # docker push "$IMAGE_TAG_LATEST"
-                  # docker push "$IMAGE_TAG_RUN"
+                  docker push "$IMAGE_TAG_LATEST"
+                  docker push "$IMAGE_TAG_RUN"
                 else
                   echo "No Dockerfile found. Building with Cloud Native Buildpacks..."
                   pack build "$IMAGE_TAG_LATEST" --path "$SRC_DIR" --builder paketobuildpacks/builder-jammy-base
                   docker tag "$IMAGE_TAG_LATEST" "$IMAGE_TAG_RUN"
-                  # docker push "$IMAGE_TAG_LATEST"
-                  # docker push "$IMAGE_TAG_RUN"
+                  docker push "$IMAGE_TAG_LATEST"
+                  docker push "$IMAGE_TAG_RUN"
                 fi
               fi
               
