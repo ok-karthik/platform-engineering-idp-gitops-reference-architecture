@@ -1,0 +1,29 @@
+name: CD Pipeline - Render & Push {{ app_name }}
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'helm-charts/{{ app_name }}/**'
+
+jobs:
+  render:
+    name: Render manifests
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Render the manifests
+        run: |
+          # Convert GitHub repository path to lowercase for Docker registry compatibility
+          IMAGE_REPO=$(echo "ghcr.io/{% raw %}${{ github.repository }}{% endraw %}/{{ team_name }}/{{ app_name }}" | tr '[:upper:]' '[:lower:]')
+
+          # Render Helm chart overriding the image repository
+          helm template {{ app_name }} helm-charts/{{ app_name }} \
+            --set image.repository="$IMAGE_REPO" \
+            --output-dir rendered-manifests
+
+      # Implement blue-green deployment later https://github.com/argoproj/argocd-example-apps/tree/master/blue-green

@@ -1,0 +1,23 @@
+name: CD Pipeline - Deploy Infrastructure
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'dev/**'
+      - 'prod/**'
+
+jobs:
+  deploy:
+    name: Terraform Apply
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Deploy Infrastructure
+        run: |
+          echo "Deploying infrastructure for {{ team_name }} (App: {{ app_name }})"
+          # Add Terraform or OpenTofu init/apply steps here

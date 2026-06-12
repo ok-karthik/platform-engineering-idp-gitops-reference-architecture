@@ -21,8 +21,8 @@ By abstracting infrastructure and deployment patterns into declarative APIs and 
 
 To make it easier to understand how this platform operates from end-to-end, the repository is logically divided into 4 chronological layers. If you are new to the platform, we recommend exploring the directories in this order:
 
-1. **`1-idp-scaffolder/` (Developer Experience)**  
-   Contains the Python CLI generator acting as the blueprint engine. It generates boilerplate microservices, CI/CD pipelines, and GitOps configurations based on organizational templates.
+1. **[`1-idp-scaffolder/`](file:///Users/karthik.orugonda/github/platform-engineering-idp-gitops-reference-architecture/1-idp-scaffolder/README.md) (Developer Experience & IDP Control Plane)**  
+   The core engine of the platform's developer portal. A Python CLI and REST API utilizing **Typer**, **Copier**, and **Pydantic** to handle zero-touch microservice onboarding. Features deterministic IP Address Management (IPAM) for tenant VPCs, strict API contracts, and dual-pass template orchestration rendering parameterized Helm charts (`helm-charts/`) and flat ArgoCD manifests (`rendered-manifests/`). For more details, see the [Scaffolder README](file:///Users/karthik.orugonda/github/platform-engineering-idp-gitops-reference-architecture/1-idp-scaffolder/README.md).
 2. **`2-tenant-workloads/` (Simulated Monorepo)**  
    *Note: Previously `generated-apps/`.* This acts as the simulated tenant source and GitOps monorepo where the scaffolded workloads reside. This directory is what ArgoCD monitors for new applications.
 3. **`3-platform-argocd-apps/` (Control Plane Orchestration)**  
@@ -108,11 +108,12 @@ make bootstrap
 ### 4. Scaffold a New Microservice
 Emulate a developer onboarding a new service. The generator builds the source code, pipelines, and GitOps configurations.
 ```bash
-./1-idp-scaffolder/.venv/bin/python ./1-idp-scaffolder/cli.py \
+# Using python directly to run the entrypoint CLI subcommand 'create'
+python 1-idp-scaffolder/main.py create \
   -a my-payment-service \
   -t springboot \
   -p 8080 \
-  -team finance-team
+  -team team-a
 ```
 
 ---
