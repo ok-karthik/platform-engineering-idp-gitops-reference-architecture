@@ -1,0 +1,2 @@
+[console_scripts]
+scaffolder = main:app

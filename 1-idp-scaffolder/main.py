@@ -1,6 +1,4 @@
-def main():
-    print("Hello from 1-idp-scaffolder!")
-
+from cli import app
 
 if __name__ == "__main__":
-    main()
+    app()

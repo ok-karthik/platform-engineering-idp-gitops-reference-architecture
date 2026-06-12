@@ -189,3 +189,10 @@ else
 	$(MAKE) delete-cluster
 endif
 	@echo "Platform completely destroyed!"
+
+install-scaffolder:
+	cd 1-idp-scaffolder && uv pip install -e .
+
+run-api:
+	cd 1-idp-scaffolder && fastapi dev api.py
+

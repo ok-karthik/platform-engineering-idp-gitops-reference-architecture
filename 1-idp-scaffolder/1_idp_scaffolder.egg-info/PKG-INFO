@@ -1,0 +1,15 @@
+Metadata-Version: 2.4
+Name: 1-idp-scaffolder
+Version: 0.1.0
+Summary: Add your description here
+Requires-Python: >=3.14
+Description-Content-Type: text/markdown
+Requires-Dist: binaryornot>=0.6.0
+Requires-Dist: copier>=9.15.1
+Requires-Dist: fastapi[standard]>=0.136.3
+Requires-Dist: jinja2>=3.1.6
+Requires-Dist: logger>=1.4
+Requires-Dist: pydantic>=2.13.4
+Requires-Dist: typer>=0.26.7
+
+"Note: For the ease of local demonstration, the Terraform templates are stored locally in the scaffolder. In a production enterprise platform, these would be referenced from a central Git Registry or Terraform Private Module Registry with version pinning (e.g., source = "git::https://github.com/org/terraform-aws-s3.git?ref=v1.2.0")."

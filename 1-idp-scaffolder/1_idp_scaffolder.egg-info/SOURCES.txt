@@ -1,0 +1,8 @@
+README.md
+pyproject.toml
+1_idp_scaffolder.egg-info/PKG-INFO
+1_idp_scaffolder.egg-info/SOURCES.txt
+1_idp_scaffolder.egg-info/dependency_links.txt
+1_idp_scaffolder.egg-info/entry_points.txt
+1_idp_scaffolder.egg-info/requires.txt
+1_idp_scaffolder.egg-info/top_level.txt

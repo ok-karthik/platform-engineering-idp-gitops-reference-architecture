@@ -1,11 +1,11 @@
-name: CD Pipeline - Render & Push my-python-app
+name: CD Pipeline - Render & Push {{ app_name }}
 
 on:
   push:
     branches:
       - main
     paths:
-      - 'apps/my-python-app/templated-manifests/**'
+      - 'apps/{{ app_name }}/templated-manifests/**'
 
 jobs:
   render:
@@ -18,13 +18,13 @@ jobs:
 
       - name: Render the manifests
         run: |
-          cd apps/my-python-app
+          cd apps/{{ app_name }}
 
           # Convert GitHub repository path to lowercase for Docker registry compatibility
-          IMAGE_REPO=$(echo "ghcr.io/${{ github.repository }}/demo-tenant/my-python-app" | tr '[:upper:]' '[:lower:]')
+          IMAGE_REPO=$(echo "ghcr.io/{% raw %}${{ github.repository }}{% endraw %}/{{ team_name }}/{{ app_name }}" | tr '[:upper:]' '[:lower:]')
 
           # Render Helm chart overriding the image repository
-          helm template my-python-app templated-manifests \
+          helm template {{ app_name }} templated-manifests \
             --set image.repository="$IMAGE_REPO" \
             --output-dir rendered-manifests
 
