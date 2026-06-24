@@ -6,7 +6,9 @@
   "customManagers": [
     {
       "customType": "regex",
-      "fileMatch": ["^1-idp-scaffolder/utils\\.py$"],
+      "managerFilePatterns": [
+        "/^1-idp-scaffolder/utils\\.py$/"
+      ],
       "matchStrings": [
         "REMOTE_TEMPLATE_REPO = \"https://github\\.com/(?<depName>[^/]+/[^/@]+)@version=(?<currentValue>v[0-9.]+.*)\""
       ],
@@ -14,7 +16,9 @@
     },
     {
       "customType": "regex",
-      "fileMatch": ["\\.tf\\.jinja$"],
+      "managerFilePatterns": [
+        "/\\.tf\\.jinja$/"
+      ],
       "matchStrings": [
         "source\\s*=\\s*\"git::https://github\\.com/(?<depName>[^/]+/[^/]+?)\\.git//.*?\\?ref=(?<currentValue>v[0-9.]+.*)\""
       ],
